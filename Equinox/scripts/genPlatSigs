@@ -1,0 +1,23 @@
+gzip -df W4INS03A_Release/images/platform/P4/P4.disk.img.gz
+./add_disk_image_sha1 W4INS03A_Release/images/platform/P4/P4.disk.img 1 &> W4INS03A_sha1.txt
+
+gzip -df W4INS04L_Release/images/platform/P4/P4.disk.img.gz
+./add_disk_image_sha1 W4INS04L_Release/images/platform/P4/P4.disk.img 1 &> W4INS04L_sha1.txt
+
+gzip -df W4INS04O_Release/images/platform/P4/P4.disk.img.gz
+./add_disk_image_sha1 W4INS04O_Release/images/platform/P4/P4.disk.img 1 &> W4INS04O_sha1.txt
+
+gzip -df W4INS04Q_Release/images/platform/P4/P4.disk.img.gz
+./add_disk_image_sha1 W4INS04Q_Release/images/platform/P4/P4.disk.img 1 &> W4INS04Q_sha1.txt
+
+gzip -df W4INS10D_Release/images/platform/P4/P4.disk.img.gz
+./add_disk_image_sha1 W4INS10D_Release/images/platform/P4/P4.disk.img 1 &> W4INS10D_sha1.txt
+
+gzip -df W4NAS07F_Release/images/platform/P4/P4.disk.img.gz
+./add_disk_image_sha1 W4NAS07F_Release/images/platform/P4/P4.disk.img 1 &> W4NAS07F_sha1.txt
+
+gzip -df W4NAS07L_Release/images/platform/P4/P4.disk.img.gz
+./add_disk_image_sha1 W4NAS07L_Release/images/platform/P4/P4.disk.img 1 &> W4NAS07L_sha1.txt
+
+gzip -df W4NYI02C_Release/images/platform/P4/P4.disk.img.gz
+./add_disk_image_sha1 W4NYI02C_Release/images/platform/P4/P4.disk.img 1 &> W4NYI02C_sha1.txt

@@ -1,0 +1,15 @@
+if [ $# -lt 4 ]; then
+        echo "Usage: genDiff <output file name> <\"project name\"> <view> <starting date> <end date>" >&2
+        exit 1
+fi
+if [ $# -eq 5 ]; then
+  stcmd diff -p "richardr:7w34034G354q634@starteam.australia.shufflemaster.com:49210/PC4G $2/$3" -w -vd "$4" -vd "$5" -is -x "*.c" > /home/sgp1000/DiffFiles/$1.diff.c.txt
+  stcmd diff -p "richardr:7w34034G354q634@starteam.australia.shufflemaster.com:49210/PC4G $2/$3" -w -vd "$4" -vd "$5" -is -x "*.cpp" > /home/sgp1000/DiffFiles/$1.diff.cpp.txt
+  stcmd diff -p "richardr:7w34034G354q634@starteam.australia.shufflemaster.com:49210/PC4G $2/$3" -w -vd "$4" -vd "$5" -is -x "*.h" > /home/sgp1000/DiffFiles/$1.diff.h.txt
+  ./lua genChanges.lua $1
+else
+  stcmd diff -p "richardr:7w34034G354q634@starteam.australia.shufflemaster.com:49210/PC4G $2/$3" -w -vd "$4" -is -x "*.c" > /home/sgp1000/DiffFiles/$1.diff.c.txt
+  stcmd diff -p "richardr:7w34034G354q634@starteam.australia.shufflemaster.com:49210/PC4G $2/$3" -w -vd "$4" -is -x "*.cpp" > /home/sgp1000/DiffFiles/$1.diff.cpp.txt
+  stcmd diff -p "richardr:7w34034G354q634@starteam.australia.shufflemaster.com:49210/PC4G $2/$3" -w -vd "$4" -is -x "*.h" > /home/sgp1000/DiffFiles/$1.diff.h.txt
+  ./lua genChanges.lua $1
+fi

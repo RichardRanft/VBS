@@ -1,0 +1,26 @@
+if [ $# -lt 3 ]; then
+        echo "Usage: BuildSLVPlatformDebugRev <Platform Version> <target> <revision>" >&2
+        exit 1
+fi
+./checkLoop.lua
+BUILD_PATH="/tools/bin:/mbtools/bin:/bin:/usr/bin:/sbin:/usr/sbin"
+
+./set_platform.lua $1_$2
+
+echo "Building $2 platform..."
+
+cd /home/sgp1000/build/images/platform/P5/$1
+if [ "$4" -gt 1 ]; then
+	env -i PATH=$BUILD_PATH sudo make --jobs=$4 namerica_debug-image
+else
+	env -i PATH=$BUILD_PATH sudo make namerica_debug-image
+fi
+if [ -e images/namerica_debug/$1-namerica_debug.img.gz ]; then
+  echo "Copying image to /home/sgp1000/DebugImages/"
+  cp -f images/namerica_debug/$1-namerica_debug.img.gz /home/sgp1000/DebugImages/$1_$3-namerica_$2.img.gz
+  cd /home/sgp1000/
+else
+  echo "Build failed - $1-namerica_debug.img.gz was not created"
+  exit 113
+fi
+ 

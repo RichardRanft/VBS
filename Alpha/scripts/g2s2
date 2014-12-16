@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# $1 - script to run
+# $2 - sandbox
+# $3 - gamecore
+# $4 - game
+
+SCRIPT="${1}"
+SANDBOX="${2}"
+GAMECORE="${3}"
+GAME="${4}"
+NAME="${5}"
+
+echo " - g2s2 - ${SANDBOX} ${GAMECORE} ${GAME}" &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+export USE_ICECREAM="no"
+
+mount --bind /gamedev /sandbox.5.00.00.002/gamedev &>> /gamedev/"${GAME}"_build.log
+mount --bind /opt /sandbox.5.00.00.002/opt &>> /gamedev/"${GAME}"_build.log
+#(
+/${SANDBOX}/tools/go2sandbox /${SANDBOX} "" sh /gamedev/"${SCRIPT}" "${SANDBOX}" "${GAMECORE}" "${GAME}" "${NAME}"
+RESULT="${?}"
+#)
+
+echo " - g2s2 exited sandbox with code ${RESULT}" &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+exit ${RESULT}

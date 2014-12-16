@@ -1,0 +1,61 @@
+#!/bin/sh
+# $1 - address
+# $2 - game
+# $3 - sandbox
+
+ADDRESS="${1}"
+GAME="${2}"
+SANDBOX="${3}"
+IMAGE1="${4}"
+IMAGE2="${5}"
+IMAGE3="${6}"
+
+OUTPUTPATH="/mnt/hgfs/buildOutput/"
+SCRIPTPATH="/mnt/hgfs/buildScripts/"
+
+#------------------------------------------------------------------------------
+if [ -e /gamedev/"${GAME}"_publish.log ]; then
+    rm -f /gamedev/"${GAME}"_publish.log
+fi
+
+#------------------------------------------------------------------------------
+echo " - publish: Address $ADDRESS, Game $GAME, Sandbox $SANDBOX : $IMAGE1 $IMAGE2 $IMAGE3" &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+if [ -z "${ADDRESS}" ]; then
+    echo " - publish: Address is empty!" &>> /gamedev/"${GAME}"_build.log
+    exit
+fi
+if [ -z "${GAME}" ]; then
+    echo " - publish: Game is empty!" &>> /gamedev/"${GAME}"_build.log
+    exit
+fi
+if [ -z "${SANDBOX}" ]; then
+    echo " - publish: Sandbox is empty!" &>> /gamedev/"${GAME}"_build.log
+    exit
+fi
+if [ -z "${IMAGE1}" ]; then
+    echo " - publish: Image 1 is empty!" &>> /gamedev/"${GAME}"_build.log
+    exit
+fi
+if [ -z "${IMAGE2}" ]; then
+    echo " - publish: Image 2 is empty!" &>> /gamedev/"${GAME}"_build.log
+    exit
+fi
+if [ -z "${IMAGE3}" ]; then
+    echo " - publish: Image 3 is empty!" &>> /gamedev/"${GAME}"_build.log
+    exit
+fi
+
+#------------------------------------------------------------------------------
+# run modified g2s script
+sh /"${SANDBOX}"/gamedev/gamecore/tools/publishInSandbox "${ADDRESS}" "${GAME}" "${SANDBOX}" "${IMAGE1}" "${IMAGE2}" "${IMAGE3}" &>> /gamedev/"${GAME}"_build.log 
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+echo " - Cleaning publishToIP from /gamedev/publishToIP ... " &>> /gamedev/"${GAME}"_build.log
+rm -f /gamedev/publishToIP &>> /gamedev/"${GAME}"_build.log
+
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+exit

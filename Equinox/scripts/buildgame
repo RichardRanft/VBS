@@ -1,0 +1,6 @@
+./set_game $1
+sh cleangame $1
+sh buildres $1
+make gconfig
+make new_nv
+make games

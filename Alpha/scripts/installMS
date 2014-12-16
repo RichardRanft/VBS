@@ -1,0 +1,12 @@
+#!/bin/sh
+# $1 - MS path
+# $2 - MS version
+# $2 - sandbox
+
+MS="${1}"
+VER="${2}"
+SANDBOX="${3}"
+
+cd /mnt/SCM.QA.Releases/ALPHA/MS/"${MS}"/"${VER}"
+
+./install.py /"${SANDBOX}"

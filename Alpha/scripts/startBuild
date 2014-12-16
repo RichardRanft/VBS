@@ -1,0 +1,49 @@
+#!/bin/sh
+# 1 - reserved
+# 2 - game
+# 3 - game core
+# 4 - sandbox
+# 5 - VM name(optional)
+# 6 - target IP(optional)
+
+RESERVED="${1}"
+GAME="${2}"
+GAMECORE="${3}"
+SANDBOX="${4}"
+if [ ! -z "${5}" ]; then
+    VMNAME="${5}"
+else
+    VMNAME="SB_5.00.00.002.vmx"
+fi
+TARGET="${6}"
+
+sh setup
+
+echo " -- Removing old build output"
+sudo rm -rf /home/sgp1000/buildOutput/*
+
+echo " -- Writing buildParams.ini"
+#touch /home/sgp1000/sharedScripts/buildParams.ini
+echo "${RESERVED}" &> /home/sgp1000/sharedScripts/buildParams.ini
+echo "${GAME}" &>> /home/sgp1000/sharedScripts/buildParams.ini
+echo "${GAMECORE}" &>> /home/sgp1000/sharedScripts/buildParams.ini
+if [ ! -z "${SANDBOX}" ]; then
+    echo "${SANDBOX}" &>> /home/sgp1000/sharedScripts/buildParams.ini
+fi
+if [ ! -z "${VMNAME}" ]; then
+    echo "${VMNAME}" &>> /home/sgp1000/sharedScripts/buildParams.ini
+fi
+if [ ! -z "${TARGET}" ]; then
+    echo "${TARGET}" &>> /home/sgp1000/sharedScripts/buildParams.ini
+fi
+echo " -- buildParams.ini ready"
+
+echo " -- Starting ${VMNAME}"
+vmrun -T ws start /home/sgp1000/vmware/AlphaBuildEnv/"${VMNAME}" nogui
+
+while [ ! -e /home/sgp1000/buildOutput/"${GAME}"_build.log ]
+do
+    sleep 30
+done
+
+echo " -- Build finished."

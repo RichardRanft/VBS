@@ -1,0 +1,33 @@
+#!/bin/sh
+# $1 - sandbox
+# $2 - gamecore
+# $3 - game
+
+SANDBOX="${1}"
+GAMECORE="${2}"
+GAME="${3}"
+
+#------------------------------------------------------------------------------
+echo "------------------------------------------------------------------------------" &>> /gamedev/"${GAME}"_build.log
+echo " - makeAllGames in sandbox: Sandbox ${SANDBOX}, Gamecore ${GAMECORE}, Game ${GAME}" &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+cd /agp/gamecore
+
+#------------------------------------------------------------------------------
+echo " - make allgames ..." &>> /gamedev/"${GAME}"_build.log
+make allgames &>> /gamedev/"${GAME}"_allgames.log
+ALLGAMES="${?}"
+if [ "${ALLGAMES}" -gt 0 ]; then
+    echo " - make allgames failed: ${ALLGAMES}" &>> /gamedev/"${GAME}"_build.log
+    exit ${ALLGAMES}
+fi
+
+#------------------------------------------------------------------------------
+echo " - build finished" &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+echo "------------------------------------------------------------------------------" &>> /gamedev/"${GAME}"_build.log
+
+# and return with our exit status from chroot
+
+exit ${ALLGAMES}

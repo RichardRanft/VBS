@@ -1,0 +1,29 @@
+PLATFORMSIGFILE=/home/sgp1000/ProductionBuildLogs/W4INS04Q.sig.txt
+GAMEPLATFORMSIG="/home/sgp1000/Technical Compliance Release/EGM/PC4/$3 $1 $4/W4INS04Q.txt"
+GAMELOGFILE=/home/sgp1000/ProductionBuildLogs/$1/$1.build.txt
+GAMESIGFILE="/home/sgp1000/Technical Compliance Release/EGM/PC4/$3 $1 $4/$1.txt"
+
+echo "Building "$3
+sleep 120
+cd /home/sgp1000/build/images/games/$1
+echo "Cleaning..."
+cp /home/sgp1000/SourcePackages/Makefile /home/sgp1000/build/images/games/$1/Makefile
+cp -f /home/sgp1000/SourcePackages/make_game_disk.sh /home/sgp1000/build/utils/bin/make_game_disk.sh
+cp -f /home/sgp1000/SourcePackages/add_disk_image_sha1 /home/sgp1000/build/utils/bin/add_disk_image_sha1 
+sudo make clean &> /dev/null
+echo "Logging to directory /home/sgp1000/ProductionBuildLogs/"$1
+mkdir /home/sgp1000/ProductionBuildLogs &> /dev/null
+mkdir /home/sgp1000/ProductionBuildLogs/$1 &> /dev/null
+echo "Starting Make..."
+cd /home/sgp1000/build/images/games/$1
+sudo make all &> /home/sgp1000/ProductionBuildLogs/$1/$1.build.txt
+echo "Copying image to /home/sgp1000/ReleaseImages/ "
+cp -f /home/sgp1000/build/images/games/$1/$1.img.gz /home/sgp1000/ReleaseImages/$1.img.gz
+sleep 60
+echo "Generating document package..."
+sudo make clean &> /dev/null
+/home/sgp1000/packetGen -b $1 -d $2 -n "$3" -p $4 &> /home/sgp1000/ProductionBuildLogs/$1/$1.gen.txt
+echo "Updating game signature document..."
+cp $PLATFORMSIGFILE "$GAMEPLATFORMSIG"
+echo -e "Game:"'\r\n'$1 $3'\r\n'$(grep -E "^sha1 generated:" $GAMELOGFILE)'\r\n'$(grep -E "^HMACsha1" $GAMELOGFILE) > $GAMESIGFILE
+echo "Finished building "$3

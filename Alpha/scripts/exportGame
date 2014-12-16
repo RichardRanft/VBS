@@ -1,0 +1,79 @@
+#!/bin/bash -e
+if [ $# -lt 3 ]; then
+    echo " -- usage: exportGame <sandbox> <game> <repository> <(optional) refresh>"
+fi
+if [ $# -gt 4 ]; then
+    echo " -- usage: exportGame <sandbox> <game> <repository> <(optional) refresh>"
+fi
+
+SANDBOX="${1}"
+GAME="${2}"
+REPOSITORY="${3}"
+NO_REFRESH="${4}"
+OUTPUTPATH="/mnt/hgfs/buildOutput/"
+
+echo " - checking out game ... " &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+if [ -z "${NO_REFRESH}" ]; then
+    #------------------------------------------------------------------------------
+    # remove potentially old source from the sandbox
+    if [ -e /"${SANDBOX}"/gamedev/"${GAME}" ]; then
+        #remove game from sandbox
+        echo " - Cleaning ${GAME} from /${SANDBOX}/gamedev/${GAME} ... " &>> /gamedev/"${GAME}"_build.log
+        rm -rf /"${SANDBOX}"/gamedev/"${GAME}" &>> /gamedev/"${GAME}"_build.log
+    fi
+
+    #------------------------------------------------------------------------------
+    # check out game source to /gamedev
+    # because VM shared folders are inaccessible from within the sandbox
+    if [ -e /gamedev/.svn ]; then
+        rm -rf /gamedev/.svn &>> /gamedev/"${GAME}"_build.log
+    fi
+
+    echo " - checking out ${REPOSITORY} to /gamedev/${GAME} ... " &>> /gamedev/"${GAME}"_build.log
+    echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+    (
+    svn export "${REPOSITORY}" /gamedev/"${GAME}" &>> "${OUTPUTPATH}""${GAME}"_export.log
+    )
+fi 
+
+if [ ! -e /gamedev/"${GAME}" ]; then
+    #------------------------------------------------------------------------------
+    # check out game source to /gamedev
+    # because VM shared folders are inaccessible from within the sandbox
+    if [ -e /gamedev/.svn ]; then
+        rm -rf /gamedev/.svn &>> /gamedev/"${GAME}"_build.log
+    fi
+
+    echo " - checking out ${REPOSITORY} to /gamedev/${GAME} ... " &>> /gamedev/"${GAME}"_build.log
+    (
+    svn export "${REPOSITORY}" /gamedev/"${GAME}" &>> "${OUTPUTPATH}""${GAME}"_export.log
+    )
+fi
+
+#------------------------------------------------------------------------------
+# refresh /agp/games link
+if [ -e /agp/games ]; then
+    echo " - removing /agp/games link ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f /agp/games &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating games link to ${GAME} /${SANDBOX}/gamedev/games ... " &>> /gamedev/"${GAME}"_build.log
+ln -s /gamedev/"${GAME}" /agp/games &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+cd /gamedev
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# refresh /sandbox/gamedev/games link
+if [ -e games ]; then
+    echo " - removing /games link ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f games &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating games link to ${GAME} /${SANDBOX}/gamedev/games ... " &>> /gamedev/"${GAME}"_build.log
+ln -sf "${GAME}" games &>> /gamedev/"${GAME}"_build.log
+
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log

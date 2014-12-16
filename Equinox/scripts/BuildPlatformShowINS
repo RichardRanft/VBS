@@ -1,0 +1,29 @@
+if [ $# -lt 1 ]; then
+        echo "Usage: BuildPlatformShow <Platform Version>" >&2
+        exit 1
+fi
+./lua checkLoop.lua
+./lua set_platform.lua $1_Show
+
+BUILD_PATH="/tools/bin:/mbtools/bin:/bin:/usr/bin:/sbin:/usr/sbin"
+
+sudo sh /home/sgp1000/fix_perms.sh --extract
+
+echo "Building show platform..."
+
+cd /home/sgp1000/build/bios
+env -i PATH=$BUILD_PATH make
+
+cd /home/sgp1000/build/images/platform/P4
+env -i PATH=$BUILD_PATH sudo ./buildplatform.sh egm_macau_ws_demo
+
+if [ -e P4.disk.img.gz ]; then
+  echo "Copying image to /home/sgp1000/ShowImages/"
+  cp -f P4.disk.img.gz /home/sgp1000/ShowImages/$1_show.disk.img.gz
+  cd /home/sgp1000/
+  sh /home/sgp1000/mountTM
+  sh /home/sgp1000/copyShowImage $1_show.disk.img.gz
+else
+  echo "Build failed - P4.disk.img.gz was not created"
+  exit 113
+fi

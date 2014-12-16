@@ -1,0 +1,59 @@
+#!/bin/sh
+# $1 - target IP address
+# $2 - game
+# $3 - sandbox
+
+ADDRESS="${1}"
+IMAGE1="${2}"
+IMAGE2="${3}"
+IMAGE3="${4}"
+RAMCLEAR="${5}"
+
+echo " - publishToIP - Address $ADDRESS, $IMAGE1 $IMAGE2 $IMAGE3, $RAMCLEAR" &> /gamedev/"${GAME}"_publish.log
+#------------------------------------------------------------------------------
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_publish.log
+
+if [ -z "${ADDRESS}" ]; then
+    echo " - publishToIP: Address is empty!" &>> /gamedev/"${GAME}"_publish.log
+    exit
+fi
+if [ -z "${GAME}" ]; then
+    echo " - publishToIP: Game is empty!" &>> /gamedev/"${GAME}"_publish.log
+    exit
+fi
+if [ -z "${IMAGE1}" ]; then
+    echo " - publishToIP: Image 1 is empty!" &>> /gamedev/"${GAME}"_publish.log
+    exit
+fi
+if [ -z "${IMAGE2}" ]; then
+    echo " - publishToIP: Image 2 is empty!" &>> /gamedev/"${GAME}"_publish.log
+    exit
+fi
+if [ -z "${IMAGE3}" ]; then
+    echo " - publishToIP: Image 3 is empty!" &>> /gamedev/"${GAME}"_publish.log
+    exit
+fi
+
+#------------------------------------------------------------------------------
+# export target IP address
+export EGMIP="${ADDRESS}"
+
+# publish game
+echo " - egmutils.exp --egmip ${ADDRESS} --install ${IMAGE1}" &>> /gamedev/"${GAME}"_publish.log
+egmutils.exp --egmip ${ADDRESS} --install "${IMAGE1}" &>> /gamedev/"${GAME}"_publish.log
+
+echo " - egmutils.exp --egmip ${ADDRESS} --install ${IMAGE2}" &>> /gamedev/"${GAME}"_publish.log
+egmutils.exp --egmip ${ADDRESS} --install "${IMAGE2}" &>> /gamedev/"${GAME}"_publish.log
+
+echo " - egmutils.exp --egmip ${ADDRESS} --install ${IMAGE3}" &>> /gamedev/"${GAME}"_publish.log
+egmutils.exp --egmip ${ADDRESS} --install "${IMAGE3}" &>> /gamedev/"${GAME}"_publish.log
+
+if [ ! -z RAMCLEAR ]; then
+    echo " - egmutils.exp --egmip ${ADDRESS} --clearnv" &>> /gamedev/"${GAME}"_publish.log
+    egmutils.exp --egmip ${ADDRESS} --clearnv &>> /gamedev/"${GAME}"_publish.log
+fi
+
+echo " - egmutils.exp --egmip ${ADDRESS} --reboot" &>> /gamedev/"${GAME}"_publish.log
+egmutils.exp --egmip ${ADDRESS} --reboot &>> /gamedev/"${GAME}"_publish.log
+
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_publish.log

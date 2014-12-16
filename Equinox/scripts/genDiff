@@ -1,0 +1,23 @@
+if [ $# -lt 3 ]; then
+        echo "Usage: genDiff <\"project name\"> <view> <starting label> <end label>" >&2
+        exit 1
+fi
+
+function change_special_characters
+{
+    echo "$(echo $1 | sed 's/%/%25/g;s/\//%2f/g;s/:/%3a/g;s/@/%40/g;s/</%3c/g;s/>/%3e/g;s/ /%20/g')"
+}
+
+game_name="$(change_special_characters "$1")"
+
+if [ $# -eq 4 ]; then
+  stcmd diff -p "richardr:7w34034G354q634@starteam.australia.shufflemaster.com:49210/PC4G $game_name/$2" -w -vl "$3" -vl "$4" -is -x "*.c" > /home/sgp1000/DiffFiles/$4.diff.c.txt
+  stcmd diff -p "richardr:7w34034G354q634@starteam.australia.shufflemaster.com:49210/PC4G $game_name/$2" -w -vl "$3" -vl "$4" -is -x "*.cpp" > /home/sgp1000/DiffFiles/$4.diff.cpp.txt
+  stcmd diff -p "richardr:7w34034G354q634@starteam.australia.shufflemaster.com:49210/PC4G $game_name/$2" -w -vl "$3" -vl "$4" -is -x "*.h" > /home/sgp1000/DiffFiles/$4.diff.h.txt
+  ./lua genChanges.lua $4
+else
+  stcmd diff -p "richardr:7w34034G354q634@starteam.australia.shufflemaster.com:49210/PC4G $game_name/$2" -w -vl "$3" -is -x "*.c" > /home/sgp1000/DiffFiles/$3.diff.c.txt
+  stcmd diff -p "richardr:7w34034G354q634@starteam.australia.shufflemaster.com:49210/PC4G $game_name/$2" -w -vl "$3" -is -x "*.cpp" > /home/sgp1000/DiffFiles/$3.diff.cpp.txt
+  stcmd diff -p "richardr:7w34034G354q634@starteam.australia.shufflemaster.com:49210/PC4G $game_name/$2" -w -vl "$3" -is -x "*.h" > /home/sgp1000/DiffFiles/$3.diff.h.txt
+  ./lua genChanges.lua $3
+fi

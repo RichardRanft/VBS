@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# $1 The game version 
+# --- WOMNAM1A
+# $2 source folder
+# --- wolf_mountain
+# $3 platform
+# $4 revision
+
+if [ $# -lt 4 ]; then
+  echo "Usage: BuildSLVDeploy <game version> <source folder> <"game name"> <platform> <revision>"
+  exit 2
+fi
+
+echo "Building "$3"
+cd /home/sgp1000/build/images/platform/P5/$3/games/egm/$1
+
+echo "Cleaning..."
+
+if [ -e /home/sgp1000/build/game_disk.img.gz ] ; then
+    sudo rm -rf /home/sgp1000/build/game_disk.img.gz /home/sgp1000/build/deploy/games
+fi
+
+echo "Starting Make..."
+cd /home/sgp1000/build/images/platform/P5/$3/games/egm/$1
+if [ -e .svn ]; then
+    sudo rm -rf .svn
+fi
+
+#/home/sgp1000/A2NAS01A_Release/images/platform/P5/A2NAS01A/games/egm/8LMSLV1A/images/namerica_deploy/
+make namerica_deploy-image &> /mnt/hgfs/buildOutput/$1/$1.build.txt
+
+if [ -e /home/sgp1000/build/images/platform/P5/$3/games/egm/$1/images/namerica_deploy/$1-namerica_deploy.img.gz ]; then
+    echo "Copying $1-namerica_deploy.img.gz to /home/sgp1000/ReleaseImages/$1_$4-namerica_deploy.img.gz"
+    if [ ! $4 == "" ]; then
+        cp -f /home/sgp1000/build/images/platform/P5/$3/games/egm/$1/images/namerica_deploy/$1-namerica_deploy.img.gz /home/sgp1000/ReleaseImages/$1_$4-namerica_deploy.img.gz
+	else
+		cp -f /home/sgp1000/build/images/platform/P5/$3/games/egm/$1/images/namerica_deploy/$1-namerica_deploy.img.gz /home/sgp1000/ReleaseImages/
+    fi
+    echo "$1-namerica_deploy.img.gz copy status: "$?
+else
+  echo "Build failed"
+  exit 113
+fi
+
+echo "Finished building "$3

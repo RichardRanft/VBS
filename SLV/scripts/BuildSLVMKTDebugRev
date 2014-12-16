@@ -1,0 +1,46 @@
+#!/bin/sh
+if [ $# -lt 4 ]; then
+        echo "Usage: BuildSLVMKTDebugRev <Game Version> <revision number> <platform> <config>" >&2
+        exit 1
+fi
+
+VERSION="${1}"
+REVISION="${2}"
+PLATFORM="${3}"
+CONFIG="${4}"
+
+OUTPUT_IMAGE_NAME="${VERSION}-${CONFIG}_debug.img.gz"
+FINAL_IMAGE_NAME="${VERSION}_${REVISION}-${CONFIG}_debug.img.gz"
+
+echo " -- Building ${VERSION} in /home/sgp1000/build/images/platform/P5/${PLATFORM}/games/egm/${VERSION}"
+echo " -- revision      : ${REVISION}"
+echo " -- platform      : ${PLATFORM}"
+echo " -- configuration : ${CONFIG}"
+echo " -- build output  : ${OUTPUT_IMAGE_NAME}"
+echo " -- final output  : ${FINAL_IMAGE_NAME}"
+
+cd "/home/sgp1000/build/images/platform/P5/${PLATFORM}/games/egm/${VERSION}"
+
+if [ -e .svn ]; then
+    sudo rm -rf .svn
+fi
+
+if [ -e /home/sgp1000/build/game_disk.img.gz ] ; then
+  sudo rm -rf /home/sgp1000/build/game_disk.img.gz /home/sgp1000/build/deploy/games
+fi
+
+make "${CONFIG}_debug-image"
+
+if [ -e "/home/sgp1000/build/images/platform/P5/${PLATFORM}/games/egm/${VERSION}/images/${CONFIG}_debug/${OUTPUT_IMAGE_NAME}" ]; then
+    echo " -- Copying image ${OUTPUT_IMAGE_NAME} to /home/sgp1000/DebugImages/${FINAL_IMAGE_NAME}"
+    cp -f "/home/sgp1000/build/images/platform/P5/${PLATFORM}/games/egm/${VERSION}/images/${CONFIG}_debug/${OUTPUT_IMAGE_NAME}" "/home/sgp1000/DebugImages/${FINAL_IMAGE_NAME}"
+
+    cd /home/sgp1000/
+    sh /home/sgp1000/mountTM
+    sh /home/sgp1000/copyDebugImage "${FINAL_IMAGE_NAME}"
+
+    echo " -- Finished Building ${VERSION}"
+else
+    echo " -- Build failed - ${OUTPUT_IMAGE_NAME} was not created.  Aborting copy"
+    exit 113
+fi

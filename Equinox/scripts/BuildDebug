@@ -1,0 +1,56 @@
+if [ $# -lt 1 ]; then
+        echo "Usage: BuildDebug <Game Version> <(optional) platform>" >&2
+        exit 1
+fi
+if [ $# -gt 1 ]; then
+  ./lua set_platform.lua $2_Debug
+  if [ -e build/images/games/$1 ]; then
+    echo "Building "$1
+    cd /home/sgp1000/build/images/games/$1
+    cp -f /home/sgp1000/SourcePackages/Makefile Makefile
+    echo "Cleaning..."
+    sudo make clean &> /dev/null
+    echo "Starting Make..."
+    sudo make all
+  else
+    echo "Copying "$1
+    cp -rf /home/sgp1000/EGMGames/$1 /home/sgp1000/build/images/games/
+    echo "Building "$1
+    cd /home/sgp1000/build/images/games/$1
+    cp -f /home/sgp1000/SourcePackages/Makefile Makefile
+    echo "Cleaning..."
+    sudo make clean &> /dev/null
+    echo "Starting Make..."
+    sudo make all
+  fi
+else
+  echo "Building "$1
+  cd /home/sgp1000/build/images/games/$1
+  cp -f /home/sgp1000/SourcePackages/Makefile Makefile
+  echo "Cleaning..."
+  sudo make clean &> /dev/null
+  echo "Starting Make..."
+  sudo make all
+fi
+echo "Copying image to /home/sgp1000/DebugImages/"
+if [ -e $1.img.gz ]; then
+  sudo chown sgp1000 *
+  if [ $2 != "" ]; then
+    mv -f $1.img.gz $1_$2_debug.img.gz
+    sudo cp -f $1_$2_debug.img.gz /home/sgp1000/DebugImages/$1_$2_debug.img.gz
+  else
+    mv -f $1.img.gz $1_debug.img.gz
+    sudo cp -f $1_debug.img.gz /home/sgp1000/DebugImages/$1_debug.img.gz
+  fi
+  echo "Finished Building "$1
+  cd /home/sgp1000/
+  sh /home/sgp1000/mountTM
+  if [ $2 != "" ]; then
+    sh /home/sgp1000/copyDebugImage $1_$2_debug.img.gz
+  else
+    sh /home/sgp1000/copyDebugImage $1_debug.img.gz
+  fi
+else
+  echo "Build failed - "$1.img.gz" was not created.  Aborting copy"
+  exit 113
+fi

@@ -1,0 +1,40 @@
+#!/bin/bash -e
+if [ $# -lt 1 ]; then
+    echo " -- usage: checkoutCore <game core> <(optional) refresh>"
+fi
+if [ $# -gt 2 ]; then
+    echo " -- usage: checkoutCore <game core> <(optional) refresh>"
+fi
+
+GAMECORE="${1}"
+REFRESH="${2}"
+
+GAME_CORE_REPO_BASE_PATH="http://10.10.130.84/svn/EGMPlatforms/tags/"
+OUTPUTPATH="/home/sgp1000/buildOutput/"
+SOURCEPATH="/home/sgp1000/buildSource/"
+
+echo " - checking out game core ... "
+echo `date +"%Y-%m-%d-%H-%M-%S"`
+
+if [ ! -z "${REFRESH}" ]; then
+    #------------------------------------------------------------------------------
+    # remove potentially old gamecore source from the sandbox
+    if [ -e "${SOURCEPATH}""${GAMECORE}" ]; then
+        #remove game from sandbox
+        echo " - Cleaning ${GAMECORE} from ${SOURCEPATH}${GAMECORE} ... "
+        sudo rm -rf ${SOURCEPATH}${GAMECORE}
+    fi
+fi
+
+if [ ! -e "${SOURCEPATH}""${GAMECORE}" ]; then
+    #------------------------------------------------------------------------------
+    # check out gamecore source to /gamedev
+    # because the desired game core is missing
+    echo " - checking out ${GAMECORE} to ${SOURCEPATH}${GAMECORE} ... "
+    svn co "${GAME_CORE_REPO_BASE_PATH}""${GAMECORE}" "${SOURCEPATH}""${GAMECORE}" &>> "${OUTPUTPATH}""${GAMECORE}"_checkout.log
+else
+    cd "${SOURCEPATH}""${GAMECORE}"
+    svn up
+fi
+
+echo `date +"%Y-%m-%d-%H-%M-%S"`

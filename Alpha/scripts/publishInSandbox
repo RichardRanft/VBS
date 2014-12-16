@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# $1 - sandbox
+# $2 - gamecore
+# $3 - game
+
+ADDRESS="${1}"
+GAME="${2}"
+SANDBOX="${3}"
+IMAGE1="${4}"
+IMAGE2="${5}"
+IMAGE3="${6}"
+
+echo " - publishInSandbox - Address $ADDRESS, Game $GAME, Sandbox $SANDBOX : $IMAGE1 $IMAGE2 $IMAGE3" &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+if [ -z "${ADDRESS}" ]; then
+    echo " - publishInSandbox: Address is empty!" &>> /gamedev/"${GAME}"_build.log
+    exit 1
+fi
+if [ -z "${GAME}" ]; then
+    echo " - publishInSandbox: Game is empty!" &>> /gamedev/"${GAME}"_build.log
+    exit 1
+fi
+if [ -z "${SANDBOX}" ]; then
+    echo " - publishInSandbox: Sandbox is empty!" &>> /gamedev/"${GAME}"_build.log
+    exit 1
+fi
+if [ -z "${IMAGE1}" ]; then
+    echo " - publishInSandbox: Image 1 is empty!" &>> /gamedev/"${GAME}"_build.log
+    exit 1
+fi
+if [ -z "${IMAGE2}" ]; then
+    echo " - publishInSandbox: Image 2 is empty!" &>> /gamedev/"${GAME}"_build.log
+    exit 1
+fi
+if [ -z "${IMAGE3}" ]; then
+    echo " - publishInSandbox: Image 3 is empty!" &>> /gamedev/"${GAME}"_build.log
+    exit 1
+fi
+
+export USE_ICECREAM="no"
+
+mount --bind /gamedev /sandbox.5.00.00.002/gamedev &>> /gamedev/"${GAME}"_build.log
+mount --bind /opt /sandbox.5.00.00.002/opt &>> /gamedev/"${GAME}"_build.log
+(
+/"${SANDBOX}"/tools/go2sandbox /"${SANDBOX}" "" sh /gamedev/publishToIP "${ADDRESS}" "${GAME}" "${SANDBOX}" "${IMAGE1}" "${IMAGE2}" "${IMAGE3}"
+)
+
+echo " - publishInSandbox exited sandbox." &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+

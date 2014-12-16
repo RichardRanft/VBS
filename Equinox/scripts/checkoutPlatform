@@ -1,0 +1,22 @@
+if [ $# -lt 1 ]; then
+        echo "Usage: checkoutPlatform <Platform Version> <Label> <View> <(opt) boot_and_root label>" >&2
+        exit 1
+fi
+echo "Removing old files..."
+sudo rm -rf /home/sgp1000/build
+sudo rm -rf /home/sgp1000/compat
+sudo rm -rf /home/sgp1000/doc
+echo "Checking out $1 at label $2 to project folder /home/sgp1000/build"
+if [ $# -eq 4 ]; then
+  stcmd co -p "gamedev:GameDev1@starteam.australia.shufflemaster.com:49209/sgp_1000_boot\&root_fs" -fp "/home/sgp1000" -eol "on" -is -o -cfgl "$4"
+else
+  stcmd co -p "gamedev:GameDev1@starteam.australia.shufflemaster.com:49209/sgp_1000_boot\&root_fs" -fp "/home/sgp1000" -eol "on" -is -o -cfgl "EGM0063"
+fi
+stcmd co -p "gamedev:GameDev1@starteam.australia.shufflemaster.com:49209/BIOS/PC4v3" -fp "/home/sgp1000/build/bios" -eol "on" -is -o
+if [ $# -gt 2 ]; then
+  stcmd co -p "gamedev:GameDev1@starteam.australia.shufflemaster.com:49209/sgp_1000/$1/$3" -fp "/home/sgp1000/build/images/platform/P4/sources" -eol "on" -is -o -cfgl "$2"
+  elif [ $# -eq 2 ]; then
+    stcmd co -p "gamedev:GameDev1@starteam.australia.shufflemaster.com:49209/sgp_1000/$1" -fp "/home/sgp1000/build/images/platform/P4/sources" -eol "on" -is -o -cfgl "$2"
+  else
+  stcmd co -p "gamedev:GameDev1@starteam.australia.shufflemaster.com:49209/sgp_1000/$1" -fp "/home/sgp1000/build/images/platform/P4/sources" -eol "on" -is -o
+fi

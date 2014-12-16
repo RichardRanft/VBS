@@ -1,0 +1,66 @@
+#!/bin/bash -e
+if [ $# -lt 2 ]; then
+    echo " -- usage: copyGameCore <game core> <game> <(optional) refresh>"
+fi
+if [ $# -gt 3 ]; then
+    echo " -- usage: copyGameCore <game core> <game> <(optional) refresh>"
+fi
+
+
+GAMECORE="${1}"
+GAME="${2}"
+REFRESH="${3}"
+
+SOURCEPATH="/mnt/hgfs/buildSource/"
+SCRIPTPATH="/mnt/hgfs/buildScripts/"
+
+echo "------------------------------------------------------------------------------" &>> /gamedev/"${GAME}"_build.log
+echo " - copying game core ${GAMECORE} ... " &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# copy gamecore to /gamedev/gamecore
+if [ ! -e /gamedev/"${GAMECORE}" ]; then
+    if [ ! -z "${REFRESH}" ]; then
+        echo " - refreshing "${GAMECORE}" ... "  &>> /gamedev/"${GAME}"_build.log
+        echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+        (
+            rsync -rI --links --exclude .svn --exclude CVS "${SOURCEPATH}""${GAMECORE}" /gamedev/ &>> /gamedev/"${GAME}"_build.log
+        )
+    else
+        echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+        (
+            rsync -r --links --exclude=.svn "${SOURCEPATH}""${GAMECORE}" /gamedev/ &>> /gamedev/"${GAME}"_build.log
+        )
+    fi
+fi
+
+#------------------------------------------------------------------------------
+# refresh /agp/gamecore link
+if [ -e /agp/gamecore ]; then
+    echo " - removing gamecore link /agp/gamecore ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f /agp/gamecore &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating gamecore link to ${GAMECORE} /agp/gamecore ... " &>> /gamedev/"${GAME}"_build.log
+ln -s /gamedev/"${GAMECORE}" /agp/gamecore &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# refresh /gamecore link
+if [ -e /gamedev/gamecore ]; then
+    echo " - removing gamecore link /gamecore ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f /gamedev/gamecore &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating gamecore link to ${GAMECORE} /gamecore ... " &>> /gamedev/"${GAME}"_build.log
+ln -sf /gamedev/"${GAMECORE}" /gamedev/gamecore &>> /gamedev/"${GAME}"_build.log
+
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+echo "------------------------------------------------------------------------------" &>> /gamedev/"${GAME}"_build.log
+ 
+#------------------------------------------------------------------------------
+# copy custom build scripts
+echo " - copying custom build scripts ... " &>> /gamedev/"${GAME}"_build.log
+cp -f "${SCRIPTPATH}"g2s2 /"${SANDBOX}"/gamedev/"${GAMECORE}"/tools/g2s2 &>> /gamedev/"${GAME}"_build.log
+cp -f "${SCRIPTPATH}"publishInSandbox /"${SANDBOX}"/gamedev/"${GAMECORE}"/tools/publishInSandbox &>> /gamedev/"${GAME}"_build.log
+

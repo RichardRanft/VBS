@@ -1,0 +1,58 @@
+#!/bin/bash -e
+if [ $# -lt 2 ]; then
+    echo " -- usage: copyGame <sandbox> <game> <(optional) refresh>"
+fi
+if [ $# -gt 3 ]; then
+    echo " -- usage: copyGame <sandbox> <game> <(optional) refresh>"
+fi
+
+
+SANDBOX="${1}"
+GAME="${2}"
+REFRESH="${3}"
+
+SOURCEPATH="/mnt/hgfs/buildSource/"
+
+echo "------------------------------------------------------------------------------" &>> /gamedev/"${GAME}"_build.log
+echo " - copying game ${GAME} ... " &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+if [ ! -z "${REFRESH}" ]; then
+    #------------------------------------------------------------------------------
+    # remove potentially old source from the sandbox
+    if [ -e /gamedev/"${GAME}" ]; then
+        #remove game from sandbox
+        echo " - Cleaning ${GAME} from /gamedev/${GAME} ... " &>> /gamedev/"${GAME}"_build.log
+        sudo rm -rf /gamedev/"${GAME}"
+    fi
+fi
+
+#------------------------------------------------------------------------------
+# copy game to /gamedev/game
+(
+    rsync -rI --exclude=.svn  --exclude CVS "${SOURCEPATH}""${GAME}" /gamedev/ &>> /gamedev/"${GAME}"_build.log
+)
+
+#------------------------------------------------------------------------------
+# refresh /agp/games link
+if [ -e /agp/games ]; then
+    echo " - removing /agp/games link ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f /agp/games &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating games link to ${GAME} /${SANDBOX}/gamedev/games ... " &>> /gamedev/"${GAME}"_build.log
+ln -s /gamedev/"${GAME}" /agp/games &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# refresh /sandbox/gamedev/games link
+if [ -e /gamedev/games ]; then
+    echo " - removing /games link ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f /gamedev/games &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating games link to ${GAME} /${SANDBOX}/gamedev/games ... " &>> /gamedev/"${GAME}"_build.log
+ln -sf /gamedev/"${GAME}" /gamedev/games &>> /gamedev/"${GAME}"_build.log
+
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+echo "------------------------------------------------------------------------------" &>> /gamedev/"${GAME}"_build.log
+

@@ -1,0 +1,8 @@
+./lua set_platform.lua $1_Release
+./BuildPlatform $1
+
+./lua set_platform.lua $1_Debug
+./BuildPlatformDebug $1
+
+./lua set_platform.lua $1_Show
+sh BuildPlatformShow $1

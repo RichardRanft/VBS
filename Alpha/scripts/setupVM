@@ -1,0 +1,83 @@
+#!/bin/sh
+# $1 - sandbox
+# $2 - gamecore
+# $3 - game
+
+SANDBOX="${1}"
+GAMECORE="${2}"
+GAME="${3}"
+CLEAN="${4}"
+
+SOURCEPATH="/mnt/hgfs/buildSource/"
+OUTPUTPATH="/mnt/hgfs/buildOutput/"
+SCRIPTPATH="/mnt/hgfs/buildScripts/"
+
+#------------------------------------------------------------------------------
+# refresh /gamedev link
+if [ -e /gamedev ]; then
+    rm -f /gamedev/*.log
+    echo " - gamedev link exists ... " &>> /"${GAME}"_build.log
+else
+    echo " - creating gamedev link to /${SANDBOX}/gamedev ... " &>> /"${GAME}"_build.log
+    ln -s /"${SANDBOX}"/gamedev /gamedev &>> /"${GAME}"_build.log
+    mv /"${GAME}"_build.log /gamedev/
+fi
+
+#------------------------------------------------------------------------------
+touch /gamedev/"${GAME}"_build.log
+touch /gamedev/"${GAME}"_install.log
+touch /gamedev/"${GAME}"_graphics.log
+touch /gamedev/"${GAME}"_allgames.log
+touch /gamedev/"${GAME}"_allsrms.log
+
+#------------------------------------------------------------------------------
+echo "------------------------------------------------------------------------------" &>> /gamedev/"${GAME}"_build.log
+echo " - setupVM: Sandbox $SANDBOX, Gamecore $GAMECORE, Game $GAME" &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+cd /
+
+#------------------------------------------------------------------------------
+# clean game and gamecore
+if [ ! -z "${CLEAN}" ]; then
+    echo " - cleaning game and gamecore ... " &>> /gamedev/"${GAME}"_build.log
+    rm -rf /gamedev/"${GAME}"
+    rm -rf /gamedev/"${GAMECORE}"
+fi
+
+#------------------------------------------------------------------------------
+# refresh /agp link
+if [ -e /agp ]; then
+    echo " - removing agp link ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f /agp &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating agp link to /${SANDBOX}/agp ... " &>> /gamedev/"${GAME}"_build.log
+ln -s /"${SANDBOX}"/agp /agp &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# copy build script that will run in sandbox to the sandbox
+echo " - copying build support scripts to sandbox ... " &>> /gamedev/"${GAME}"_build.log
+
+echo " -- "${SCRIPTPATH}"makeInstall" &>> /gamedev/"${GAME}"_build.log
+cp -f "${SCRIPTPATH}"makeInstall /gamedev/ &>> /gamedev/"${GAME}"_build.log
+
+echo " -- "${SCRIPTPATH}"makeGraphics" &>> /gamedev/"${GAME}"_build.log
+cp -f "${SCRIPTPATH}"makeGraphics /gamedev/ &>> /gamedev/"${GAME}"_build.log
+
+echo " -- "${SCRIPTPATH}"makeAllGames" &>> /gamedev/"${GAME}"_build.log
+cp -f "${SCRIPTPATH}"makeAllGames /gamedev/ &>> /gamedev/"${GAME}"_build.log
+
+echo " -- "${SCRIPTPATH}"makeAllSRMS" &>> /gamedev/"${GAME}"_build.log
+cp -f "${SCRIPTPATH}"makeAllSRMS /gamedev/ &>> /gamedev/"${GAME}"_build.log
+
+echo " - copying ${SCRIPTPATH}publishToIP to /gamedev/publishToIP ... " &>> /gamedev/"${GAME}"_build.log
+cp -f "${SCRIPTPATH}"/publishToIP /gamedev/ &>> /gamedev/"${GAME}"_build.log
+
+echo " - copying ${SCRIPTPATH}publishInSandbox to /gamedev/${GAMECORE}/tools/ ... " &>> /gamedev/"${GAME}"_build.log
+cp -f "${SCRIPTPATH}"/publishInSandbox /gamedev/"${GAMECORE}"/tools/ &>> /gamedev/"${GAME}"_build.log
+
+echo " - copying ${SCRIPTPATH}go2sandbox to /${SANDBOX}/tools/ ... " &>> /gamedev/"${GAME}"_build.log
+cp -f "${SCRIPTPATH}"/go2sandbox /"${SANDBOX}"/tools/ &>> /gamedev/"${GAME}"_build.log
+
+exit 

@@ -1,0 +1,22 @@
+sh /home/sgp1000/mountENG
+if [ ! -e /mnt/Release/EGM/PC4/$3 ]; then
+  mkdir /mnt/Release/EGM/PC4/$3
+fi
+
+if [ -e "/mnt/Release/EGM/PC4/$3/$1" ]; then
+    sudo rm -rf "/mnt/Release/EGM/PC4/$3/$1"
+    sleep 20
+fi
+
+sudo cp -rf "/home/sgp1000/Release/EGM/PC4/$3/$1" "/mnt/Release/EGM/PC4/$3/"
+
+sh /home/sgp1000/mountTM
+
+sudo cp -rf /home/sgp1000/ReleaseImages/$2 /mnt/TableMaster/EGM_AMERICA/ReleaseImages/
+
+if [ -e "/mnt/TableMaster/Technical Compliance Releases/EGM/PC4/$3/$1" ]; then
+    sudo rm -rf "/mnt/TableMaster/Technical Compliance Releases/EGM/PC4/$3/$1"
+    sleep 20
+fi
+
+sudo cp -rf "/home/sgp1000/Release/EGM/PC4/$3/$1" "/mnt/TableMaster/Technical Compliance Releases/EGM/PC4/$3/"

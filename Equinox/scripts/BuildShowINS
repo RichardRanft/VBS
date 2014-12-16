@@ -1,0 +1,22 @@
+if [ $# -lt 1 ]; then
+        echo "Usage: BuildShowINS <Game Version>" >&2
+        exit 1
+fi
+echo "Building "$1
+cd /home/sgp1000/build/images/games/$1
+cp -f /home/sgp1000/SourcePackages/Makefile Makefile
+echo "Cleaning..."
+sudo make clean &> /dev/null
+echo "Starting Make..."
+sudo make all
+if [ -e $1.img.gz ]; then
+  echo "Copying image to /home/sgp1000/ShowImages/"
+  sudo mv -f $1.img.gz $1_show.img.gz
+  cp $1_show.img.gz /home/sgp1000/ShowImages/$1_show.img.gz
+  echo "Finished Building "$1
+  cd /home/sgp1000/
+  sh /home/sgp1000/mountTM
+  sh /home/sgp1000/copyShowImage $1_Show.img.gz
+else
+  echo "Build failed - "$1.img.gz" not present"
+fi

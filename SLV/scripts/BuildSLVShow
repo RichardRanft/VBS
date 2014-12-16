@@ -1,0 +1,31 @@
+if [ $# -lt 2 ]; then
+        echo "Usage: BuildShow <Game Version> <Platform>" >&2
+        exit 1
+fi
+
+echo "Building "$1
+cd /home/sgp1000/build/images/platform/P5/$2/games/egm/$1
+
+if [ -e .svn ]; then
+    sudo rm -rf .svn
+fi
+
+if [ -e /home/sgp1000/build/game_disk.img.gz ] ; then
+  sudo rm -rf /home/sgp1000/build/game_disk.img.gz /home/sgp1000/build/deploy/games
+fi
+
+make namerica_demo-image
+
+if [ -e /home/sgp1000/build/images/platform/P5/$2/games/egm/$1/images/namerica_demo/$1-namerica_demo.img.gz ]; then
+    echo "Copying image to /home/sgp1000/ShowImages/ "
+    cp -f /home/sgp1000/build/images/platform/P5/$2/games/egm/$1/images/namerica_demo/$1-namerica_demo.img.gz /home/sgp1000/ShowImages/$1-namerica_show.img.gz
+
+    cd /home/sgp1000/
+    sh /home/sgp1000/mountTM
+    sh /home/sgp1000/copyShowImage $1-namerica_show.img.gz
+
+    echo "Finished Building "$1
+else
+    echo "Build failed - "$1-namerica_demo.img.gz" was not created.  Aborting copy"
+    exit 113
+fi

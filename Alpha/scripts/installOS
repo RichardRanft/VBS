@@ -1,0 +1,12 @@
+#!/bin/sh
+# $1 - OS path
+# $2 - OS version
+# $2 - sandbox
+
+OS="${1}"
+VER="${2}"
+SANDBOX="${3}"
+
+cd /mnt/SCM.QA.Releases/ALPHA/OS/"${OS}"/"${VER}"
+
+./install.py /"${SANDBOX}"

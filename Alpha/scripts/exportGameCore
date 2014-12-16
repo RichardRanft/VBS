@@ -1,0 +1,80 @@
+#!/bin/bash -e
+if [ $# -lt 2 ]; then
+    echo " -- usage: exportGameCore <sandbox> <game core> <(optional) refresh>"
+fi
+if [ $# -gt 3 ]; then
+    echo " -- usage: exportGameCore <sandbox> <game core> <(optional) refresh>"
+fi
+
+SANDBOX="${1}"
+GAMECORE="${2}"
+GAME="${3}"
+NO_REFRESH="${4}"
+
+GAME_CORE_REPO_BASE_PATH="http://10.10.130.84/svn/EGMPlatforms/trunk/EGMPlatforms/"
+OUTPUTPATH="/mnt/hgfs/buildOutput/"
+
+echo " - checking out game core ... " &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+if [ -z "${NO_REFRESH}" ]; then
+    #------------------------------------------------------------------------------
+    # remove potentially old gamecore source from the sandbox
+    if [ -e /"${SANDBOX}"/gamedev/"${GAMECORE}" ]; then
+        #remove game from sandbox
+        echo " - Cleaning ${GAMECORE} from /${SANDBOX}/gamedev/${GAMECORE} ... " &>> /gamedev/"${GAME}"_build.log
+        rm -rf /"${SANDBOX}"/gamedev/"${GAMECORE}" &>> /gamedev/"${GAME}"_build.log
+    fi
+
+    #------------------------------------------------------------------------------
+    # check out gamecore source to /gamedev
+    # because VM shared folders are inaccessible from within the sandbox
+    if [ -e /gamedev/.svn ]; then
+        rm -rf /gamedev/.svn &>> /gamedev/"${GAME}"_build.log
+    fi
+
+    echo " - checking out ${GAMECORE} to /gamedev/${GAMECORE} ... " &>> /gamedev/"${GAME}"_build.log
+    (
+    svn export "${GAME_CORE_REPO_BASE_PATH}""${GAMECORE}" /gamedev/"${GAMECORE}" &>> "${OUTPUTPATH}""${GAMECORE}"_export.log
+    )
+fi
+
+if [ ! -e /gamedev/"${GAMECORE}" ]; then
+    #------------------------------------------------------------------------------
+    # check out gamecore source to /gamedev
+    # because the desired game core is missing
+    if [ -e /gamedev/.svn ]; then
+        rm -rf /gamedev/.svn &>> /gamedev/"${GAME}"_build.log
+    fi
+
+    echo " - checking out ${GAMECORE} to /gamedev/${GAMECORE} ... " &>> /gamedev/"${GAME}"_build.log
+    (
+    svn export "${GAME_CORE_REPO_BASE_PATH}""${GAMECORE}" /gamedev/"${GAMECORE}" &>> "${OUTPUTPATH}""${GAMECORE}"_export.log
+    )
+fi
+
+#------------------------------------------------------------------------------
+# refresh /agp/gamecore link
+if [ -e /agp/gamecore ]; then
+    echo " - removing gamecore link /agp/gamecore ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f /agp/gamecore &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating gamecore link to ${GAMECORE} /agp/gamecore ... " &>> /gamedev/"${GAME}"_build.log
+ln -s /gamedev/"${GAMECORE}" /agp/gamecore &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+cd /gamedev
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# refresh /gamecore link
+if [ -e gamecore ]; then
+    echo " - removing gamecore link /gamecore ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f gamecore &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating gamecore link to ${GAMECORE} /gamecore ... " &>> /gamedev/"${GAME}"_build.log
+ln -sf "${GAMECORE}" gamecore &>> /gamedev/"${GAME}"_build.log
+
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log

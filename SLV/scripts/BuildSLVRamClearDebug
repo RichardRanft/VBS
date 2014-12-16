@@ -1,0 +1,26 @@
+if [ $# -lt 1 ]; then
+        echo "Usage: BuildSLVRamClearDebug <Platform Version> <target>" >&2
+        exit 1
+fi
+./checkLoop.lua
+BUILD_PATH="/tools/bin:/mbtools/bin:/bin:/usr/bin:/sbin:/usr/sbin"
+
+./set_platform.lua $1_$2
+
+echo "Building debug ram clear image..."
+
+cd /home/sgp1000/build/images/platform/P5/$1
+
+env -i PATH=$BUILD_PATH make usa_ram_clear_debug-image &> /home/sgp1000/$1_debug.log
+
+if [ -e images/usa_ram_clear_debug/$1-usa_ram_clear_debug.img.gz ]; then
+  echo "Copying image to /home/sgp1000/DebugImages/"
+  cp -f images/usa_ram_clear_debug/$1-usa_ram_clear_debug.img.gz /home/sgp1000/DebugImages/
+  cd /home/sgp1000/
+  sh /home/sgp1000/mountTM
+  sh /home/sgp1000/copyDebugImage $1-usa_ram_clear_debug.img.gz
+else
+  echo "Build failed - $1-usa_ram_clear_debug.img.gz was not created"
+  exit 113
+fi
+ 

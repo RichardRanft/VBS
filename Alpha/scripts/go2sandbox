@@ -1,0 +1,271 @@
+#!/bin/sh
+
+if [ -f ~/.bashrc ]; then
+  . ~/.bashrc
+fi
+if [ -f /etc/profile ]; then
+  . /etc/profile
+fi
+
+unset PROFILEREAD
+
+usage(){
+  echo
+  echo 'USAGE: '$0' [sandbox.x.xx.xx.xxx] [ ,, COMMAND]'
+  echo '     where p1 is the optional name of the sandbox directory'
+  echo '     and p2 is blank and p3-n are the command to execute in sandbox'
+  echo
+  exit
+}
+
+if [ "$1" = "" ]; then
+  SANDBOX_DIR="$0";
+else
+  SANDBOX_DIR="$1"
+fi
+
+# create an absolute path
+if [ "${SANDBOX_DIR:0:1}" != "/" ];then SANDBOX_DIR="$(pwd)/$SANDBOX_DIR"; fi
+# get rid of duplicate "//" and "/./"
+SANDBOX_DIR="$(echo $SANDBOX_DIR | sed -e "s/\/\//\//g" -e "s/\/\.\//\//g" )"
+# get rid of the "/tools/go2sandbox"
+SANDBOX_DIR=$(echo $SANDBOX_DIR | sed -e "s/\/tools\/go2sandbox//" )
+
+# ensure $SANDBOX_DIR is not a symbolic link. 
+if [ -L ${SANDBOX_DIR} ]; then #True if file exists and is a symbolic link. 
+  SANDBOX_DIR="$(stat --format=%N ${SANDBOX_DIR} | awk '{print $3}')" #returns quoted link target
+  SANDBOX_DIR=${SANDBOX_DIR#\`} #strip off leading  `
+  SANDBOX_DIR=${SANDBOX_DIR%\'} #strip off trailing '
+  SANDBOX_DIR=${SANDBOX_DIR%/}  #strip off trailing /
+  #DEBUG: echo "after detecting symbolic link, SANDBOX_DIR is: ${SANDBOX_DIR}"
+fi
+
+# reasonablility check
+if [ ! -x $SANDBOX_DIR/bin/bash ]; then usage; fi
+
+  if [ $# -le 2 ];then
+      COMMAND="bash -l -i "
+  else
+      # check for optional script to run
+      if [ "$2" = "" ]; then
+          shift
+          COMMAND='bash -l -c '"\"$(echo -n $@);\""
+          # echo 'SANDBOX_DIR='\"$SANDBOX_DIR\"
+          # echo 'COMMAND    ='$COMMAND
+          echo =============================================================================
+          echo 'Will execute:chroot '$SANDBOX_DIR $COMMAND
+          echo =============================================================================
+      else
+          COMMAND="bash -l -i "
+  fi
+fi
+
+# ===================================================================
+# helper function for mounting the /sandbox/etc/fstab files
+smount(){
+  if [ "${4}" != "auto" ]; then return; fi
+
+local RESULT
+local WHAT=${1}
+local WHERE="$(echo ${SANDBOX_DIR}/${2} | sed -e "s/\/\/*/\//g")"
+local TYPE=${3}
+
+  if [ "${TYPE}" = "bind" ]; then
+    # make sure we are binding from valid place
+    if [ ! -d ${WHAT} ]; then 
+       printf "%-40s %s\n" ${WHAT} ' =>bind not dir'; return; 
+    fi
+  else
+    # is this file system supported?
+    if [ "$(/bin/grep ${TYPE} /proc/filesystems)" = "" ]; then
+       printf "%-40s %s\n" ${TYPE} ' =>not supported'; return;
+    fi
+  fi
+
+  # make sure WHERE is reasonable!
+  if [ ! -d ${WHERE} ]; then 
+     printf "%-40s %s\n" ${WHERE} ' =>mount not dir'; return; 
+  fi
+
+  # is it already mounted where we want it
+  if [ "$(grep ${WHERE} /proc/mounts)" != "" ]; then
+    printf "%-40s %s" ${WHERE} ' =>already mounted '
+
+    if [ "${TYPE}" = "bind" ]; then
+      echo with bind
+      return
+    fi
+
+    # is it correct?
+    local EXMN="$(grep ${WHERE} /proc/mounts | grep $TYPE | grep $WHAT)"
+    if [ "${EXMN}" = "" ]; then
+      echo but not correctly!
+    else
+      echo correctly
+    fi
+    return
+  else
+
+    if [ "${TYPE}" = "bind" ]; then
+      mount --bind ${WHAT} ${WHERE};
+      let RESULT=$?
+    else
+      mount -t ${TYPE} ${WHAT} ${WHERE};
+      let RESULT=$?
+    fi
+
+    if [ ${RESULT} -ne 0 ]; then
+      printf "%-40s failed: reason=%d\n" ${WHERE} ${RESULT}
+    fi  
+  fi
+}
+
+# make sure that at this point we have a physical directory path to use
+
+SANDBOX_FSTAB="${SANDBOX_DIR}/etc/fstab"
+SANDBOX_MCNTFILE=$(echo sbxmcnt"${SANDBOX_DIR}" | sed 's/\//-/g')
+
+if [ ! -f ${SANDBOX_FSTAB} ]; then echo "fstab file NOT supplied"; exit 0; fi
+
+# see if sandbox /tmp file system if already mounted
+SBMOUNT=$(grep "$SANDBOX_DIR/tmp" /proc/mounts)
+if [ "$SBMOUNT" = "" ]; then
+  # NOT mounted initalize the mount count
+  echo $(( 1 )) >/var/log/"$SANDBOX_MCNTFILE"
+else
+  # mounted, increment the mount count
+  echo $(( $( cat /var/log/"$SANDBOX_MCNTFILE" 2>/dev/null ) + 1 )) >/var/log/"$SANDBOX_MCNTFILE"
+fi
+
+
+let EOF=0
+while [ ${EOF} -eq 0 ]; do
+
+  read; let EOF=$?
+  if [ ${EOF} -ne 0 ]; then break; fi; # EOF=1
+  REPLY=$(echo ${REPLY}); # strip excess white space and pack the fields
+
+  if [ "${REPLY}"     = ""  ]; then continue; fi; # blank line
+  if [ "${REPLY:0:1}" = "#" ]; then continue; fi; # comment
+
+  smount ${REPLY}; # attempt the mount
+
+done <${SANDBOX_FSTAB}
+
+# get the current linux version
+# so we know where to get our sdgmodules from
+LINUX_VERSION=$(echo $(uname -r))
+
+# copy development sdg modules to /sandbox/lib/modules/${LINUX_VERSION}sdgmodules
+#Also include usb and serial layer modules
+mkdir -p "${SANDBOX_DIR}/lib/modules/${LINUX_VERSION}/sdgmodules"
+mkdir -p "${SANDBOX_DIR}/lib/modules/${LINUX_VERSION}/kernel/drivers/usb/core"
+mkdir -p "${SANDBOX_DIR}/lib/modules/${LINUX_VERSION}/kernel/drivers/usb/host"
+mkdir -p "${SANDBOX_DIR}/lib/modules/${LINUX_VERSION}/kernel/drivers/serial"
+mkdir -p "${SANDBOX_DIR}/lib/modules/${LINUX_VERSION}/kernel/drivers/block"
+if [ -d "/lib/modules/${LINUX_VERSION}/sdgmodules" ]; then
+  /bin/cp -uxRfpd "/lib/modules/${LINUX_VERSION}/sdgmodules/"* "${SANDBOX_DIR}/lib/modules/${LINUX_VERSION}/sdgmodules"
+fi
+if [ -f "/lib/modules/${LINUX_VERSION}/kernel/drivers/usb/core/usbcore.ko" ];then
+	/bin/cp -uxRfpd "/lib/modules/${LINUX_VERSION}/kernel/drivers/usb/core/usbcore.ko" \
+		"${SANDBOX_DIR}/lib/modules/${LINUX_VERSION}/kernel/drivers/usb/core"
+fi
+/bin/cp -uxRfpd "/lib/modules/${LINUX_VERSION}/kernel/drivers/usb/host/"* \
+	"${SANDBOX_DIR}/lib/modules/${LINUX_VERSION}/kernel/drivers/usb/host"
+if [ -d "/lib/modules/${LINUX_VERSION}/kernel/drivers/serial/" ];then
+	/bin/cp -uxRfpd "/lib/modules/${LINUX_VERSION}/kernel/drivers/serial/"* \
+		"${SANDBOX_DIR}/lib/modules/${LINUX_VERSION}/kernel/drivers/serial"
+fi
+if [ -f "/lib/modules/${LINUX_VERSION}/kernel/drivers/block/loop.ko" ];then
+	/bin/cp -uxRfpd "/lib/modules/${LINUX_VERSION}/kernel/drivers/block/loop.ko" \
+		"${SANDBOX_DIR}/lib/modules/${LINUX_VERSION}/kernel/drivers/block"
+fi
+
+"${SANDBOX_DIR}"/sbin/depmod -a -b "${SANDBOX_DIR}"
+
+unset SBMOUNT LINUX_VERSION RESULT
+
+# fix up the time zone in the sandbox
+/bin/cp -Rfpd /etc/localtime $SANDBOX_DIR/etc/localtime
+
+# copy pulse directory required for 12.1 dev station
+
+/bin/cp -Rfpd /var/lib/dbus/machine-id "${SANDBOX_DIR}"/var/lib/dbus
+
+/bin/cp -Rfpd /root/.pulse "${SANDBOX_DIR}"/root/
+
+
+# fix up mtab if not already fixed
+if [ ! -L $SANDBOX_DIR/etc/mtab ]; then
+  rm -f $SANDBOX_DIR/etc/mtab
+  ln -s /proc/mounts  $SANDBOX_DIR/etc/mtab
+fi
+
+if [ "$DISPLAY" = "" ]; then
+  # we are probably local in this case
+  export DISPLAY=:0.0
+  xhost +
+else
+  # we could be either local or SSH
+  if [  "$(echo ${DISPLAY} |cut -d ':' -f1 )" != "" \
+     -a "$(echo ${SSH_CLIENT})" != "" ]; then
+    # we are ssh = fix the DISPLAY
+    export DISPLAY=${SSH_CLIENT%% *}:0.0
+  else
+    echo DISPLAY=\"${DISPLAY}\" SSH_CLIENT=\"${SSH_CLIENT}\"
+    xhost +
+  fi
+fi
+echo DISPLAY=\"$DISPLAY\"
+
+# link ash to bash so we can run agp in the sanbox
+cd /$SANDBOX_DIR/bin
+if [ ! -f ash ]; then
+   ln -s bash ash
+fi
+
+# display the sandbox name and the working directory for our prompt
+export PS1='['$SANDBOX_DIR': \W]\$'
+
+# let's go to the sandbox and play.
+$SANDBOX_DIR/sbin/ldconfig -r "$SANDBOX_DIR"
+
+export SANDBOX_DIR
+export PATH=":/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/X11R6/bin:"
+export LD_LIBRARY_PATH=":"
+
+# these variable affect suse12.1 simulation mode. unset.
+
+unset MALLOC_CHECK_
+unset MALLOC_PERTURB_
+
+eval $(echo -n chroot "$SANDBOX_DIR" $COMMAND)
+# save our result for return
+RESULT=$?
+#echo "${RESULT}" &>> /go2sandbox.log
+# do any clean up we might need
+
+# start with un-mounting anything mounted
+sbxmcnt=$(( $( cat /var/log/"$SANDBOX_MCNTFILE" 2>/dev/null ) - 1 ))
+if [ $sbxmcnt -le 0 ]; then
+
+  UMOUNT_LIST="$(grep ${SANDBOX_DIR}/[a-z] /proc/mounts  |awk '{print $2}'  |sort -r)"
+  while [ "${UMOUNT_LIST}" != "" ]; do
+    for M in ${UMOUNT_LIST}; do
+      /bin/umount $M
+    done
+    UMOUNT_LIST="$(grep ${SANDBOX_DIR}/[a-z] /proc/mounts  |awk '{print $2}'  |sort -r)"
+  done;
+
+  echo $(( 0 )) >/var/log/"$SANDBOX_MCNTFILE"
+
+
+else
+
+  echo $sbxmcnt >/var/log/"$SANDBOX_MCNTFILE"
+
+fi
+
+# and return with our exit status from chroot
+exit $RESULT
+

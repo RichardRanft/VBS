@@ -1,0 +1,13 @@
+if [ "$1" == "y" ] || [ "$1" == "Y" ]
+then
+  echo "Building debug platform..."
+  cd /home/sgp1000/build/images/platform/P4
+  $(build_env) sudo ./buildplatform.sh egm_namerica_ws_debug &> /dev/null
+  echo "Copying image to /home/sgp1000/DebugImages/"
+  cp P4.disk.img.gz /home/sgp1000/DebugImages/P4_debug.disk.img.gz
+fi
+
+sh /home/sgp1000/BuildDebug CBPNAM1B
+sh /home/sgp1000/BuildDebug HJENAM1B
+sh /home/sgp1000/BuildDebug MJENAM1B
+sh /home/sgp1000/BuildDebug TIPNAM1B

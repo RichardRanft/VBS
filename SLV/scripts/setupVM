@@ -1,0 +1,21 @@
+#!/bin/bash
+
+SOURCEFOLDER="/mnt/hgfs/buildSource/"
+OUTFOLDER="/mnt/hgfs/buildOutput/"
+SOURCEFOLDER="/mnt/hgfs/buildSource/"
+
+mkdir "${OUTFOLDER}"ProductionBuildLogs
+
+if [ -e /home/sgp1000/ProductionBuildLogs ]; then
+    sudo rm -f /home/sgp1000/ProductionBuildLogs
+fi
+
+ln -s /home/sgp1000/ProductionBuildLogs "${OUTFOLDER}"ProductionBuildLogs
+
+if [ -e /home/sgp1000/build ]; then
+    sudo rm -f /home/sgp1000/build
+fi
+
+if [ -e "${OUTFOLDER}"build ]; then
+    ln -s /home/sgp1000/build "${SOURCEFOLDER}"build
+fi

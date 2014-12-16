@@ -1,0 +1,10 @@
+#!/bin/sh
+# $1 - sandbox path
+# $2 - sandbox minor version
+
+SANDBOXPATH="${1}"
+SANDBOXVER="${2}"
+
+cd /mnt/SCM.QA.Releases/ALPHA/SANDBOX/"${SANDBOXPATH}"/"${SANDBOXVER}"
+
+sh install

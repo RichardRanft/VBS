@@ -1,0 +1,6 @@
+cp /dev/null ~/DiffFiles/$1.c.changes.txt
+cp /dev/null ~/DiffFiles/$1.cpp.changes.txt
+cp /dev/null ~/DiffFiles/$1.h.changes.txt
+grep -v -P '^[a-z|A-Z]' ~/DiffFiles/$1.diff.c.txt > ~/DiffFiles/$1.c.changes.txt
+grep -v -P '^[a-z|A-Z]' ~/DiffFiles/$1.diff.cpp.txt > ~/DiffFiles/$1.cpp.changes.txt
+grep -v -P '^[a-z|A-Z]' ~/DiffFiles/$1.diff.h.txt > ~/DiffFiles/$1.h.changes.txt

@@ -1,0 +1,24 @@
+#!/bin/sh
+# $1 - sandbox
+# $2 - gamecore
+# $3 - game
+
+SANDBOX="${1}"
+GAMECORE="${2}"
+GAME="${3}"
+
+#------------------------------------------------------------------------------
+echo "------------------------------------------------------------------------------" &>> /gamedev/"${GAME}"_build.log
+echo " - buildAllGames: Sandbox $SANDBOX, Gamecore $GAMECORE, Game $GAME" &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# run modified g2s script
+sh /"${SANDBOX}"/gamedev/"${GAMECORE}"/tools/g2s2 "makeAllGames" "${SANDBOX}" "${GAMECORE}" "${GAME}" &>> /gamedev/"${GAME}"_build.log
+RESULT="${?}"
+#------------------------------------------------------------------------------
+
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+echo "------------------------------------------------------------------------------" &>> /gamedev/"${GAME}"_build.log
+
+exit ${RESULT}

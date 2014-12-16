@@ -1,0 +1,7 @@
+if [ ! -e "/mnt/TM" ]; then
+  sudo mkdir /mnt/TM
+fi
+if [ ! -e /mnt/TM/rranft/ ]; then
+  sudo mount -t cifs //192.168.250.132/TableMaster/ -o username=rranft@shuffle,password="%qjq4qO7hh$qhr5" /mnt/TM
+fi
+ 

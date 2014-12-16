@@ -1,0 +1,89 @@
+#!/bin/sh
+# $1 - target IP address
+# $2 - game
+# $3 - sandbox
+
+ADDRESS="${1}"
+IMAGE1="${2}"
+IMAGE2="${3}"
+IMAGE3="${4}"
+RAMCLEAR="${5}"
+
+LOGPATH="/home/sgp1000/buildOutput/"
+
+echo " - publishToEGM - Address $ADDRESS, $IMAGE1 $IMAGE2 $IMAGE3, $RAMCLEAR" &> /"${LOGPATH}"/"${ADDRESS}"_publish.log
+#------------------------------------------------------------------------------
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+
+if [ -z "${ADDRESS}" ]; then
+    echo " - publishToIP: Address is empty!" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+    exit
+fi
+if [ -z "${IMAGE1}" ]; then
+    echo " - publishToIP: Image 1 is empty!" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+    exit
+fi
+if [ -z "${IMAGE2}" ]; then
+    echo " - publishToIP: Image 2 is empty!" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+    exit
+fi
+if [ -z "${IMAGE3}" ]; then
+    echo " - publishToIP: Image 3 is empty!" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+    exit
+fi
+
+#------------------------------------------------------------------------------
+# export target IP address
+export EGMIP="${ADDRESS}"
+
+# publish game
+echo " - egmutils.exp --egmip ${ADDRESS} --install ${IMAGE1}" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+egmutils.exp --egmip ${ADDRESS} --install "${IMAGE1}" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+RESULT="${?}"
+
+if [ ${RESULT} -ne 0 ]; then
+    echo " - egmutils.exp --egmip ${ADDRESS} --install ${IMAGE1} FAILED: $RESULT" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+    exit ${RESULT}
+fi
+
+echo " - egmutils.exp --egmip ${ADDRESS} --install ${IMAGE2}" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+egmutils.exp --egmip ${ADDRESS} --install "${IMAGE2}" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+RESULT="${?}"
+
+if [ ${RESULT} -ne 0 ]; then
+    echo " - egmutils.exp --egmip ${ADDRESS} --install ${IMAGE2} FAILED: $RESULT" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+    exit ${RESULT}
+fi
+
+echo " - egmutils.exp --egmip ${ADDRESS} --install ${IMAGE3}" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+egmutils.exp --egmip ${ADDRESS} --install "${IMAGE3}" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+RESULT="${?}"
+
+if [ ${RESULT} -ne 0 ]; then
+    echo " - egmutils.exp --egmip ${ADDRESS} --install ${IMAGE3} FAILED: $RESULT" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+    exit ${RESULT}
+fi
+
+if [ ! -z RAMCLEAR ]; then
+    echo " - egmutils.exp --egmip ${ADDRESS} --clearnv" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+    egmutils.exp --egmip ${ADDRESS} --clearnv &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+    RESULT="${?}"
+
+    if [ ${RESULT} -ne 0 ]; then
+        echo " - egmutils.exp --egmip ${ADDRESS} --clearnv FAILED: $RESULT" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+        exit ${RESULT}
+    fi
+fi
+
+echo " - egmutils.exp --egmip ${ADDRESS} --reboot" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+egmutils.exp --egmip ${ADDRESS} --reboot &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+RESULT="${?}"
+
+if [ ${RESULT} -ne 0 ]; then
+    echo " - egmutils.exp --egmip ${ADDRESS} --reboot FAILED: $RESULT" &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+    exit ${RESULT}
+fi
+
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>>  /"${LOGPATH}"/"${ADDRESS}"_publish.log
+
+exit ${RESULT}

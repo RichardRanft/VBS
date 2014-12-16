@@ -1,0 +1,24 @@
+if [ $# -lt 1 ]; then
+        echo "Usage: BuildSLVPlatformDebug <Platform Version>" >&2
+        exit 1
+fi
+./checkLoop.lua
+BUILD_PATH="/tools/bin:/mbtools/bin:/bin:/usr/bin:/sbin:/usr/sbin"
+
+./set_platform.lua $1_Debug
+
+echo "Building debug platform..."
+
+cd /home/sgp1000/build/images/platform/P5/$1
+
+env -i PATH=$BUILD_PATH sudo make namerica_debug-image &> /home/sgp1000/$1_debug.log
+
+if [ -e images/namerica_debug/$1-namerica_debug.img.gz ]; then
+  echo "Copying image to /home/sgp1000/DebugImages/"
+  cp -f images/namerica_debug/$1-namerica_debug.img.gz /home/sgp1000/DebugImages/
+  cd /home/sgp1000/
+else
+  echo "Build failed - $1-namerica_debug.img.gz was not created"
+  exit 113
+fi
+ 

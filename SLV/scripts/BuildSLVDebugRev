@@ -1,0 +1,38 @@
+if [ $# -lt 3 ]; then
+        echo "Usage: BuildSLVDebugRev <Game Version> <revision number> <platform>" >&2
+        exit 1
+fi
+
+echo " -- Building "$1" in /home/sgp1000/build/images/platform/P5/$3/games/egm/$1"
+cd /home/sgp1000/build/images/platform/P5/$3/games/egm/$1
+
+if [ -e .svn ]; then
+    sudo rm -rf .svn
+fi
+
+if [ -e /home/sgp1000/build/game_disk.img.gz ] ; then
+  sudo rm -rf /home/sgp1000/build/game_disk.img.gz /home/sgp1000/build/deploy/games
+fi
+
+make namerica_debug-image
+
+OUTPUT_IMAGE_NAME=$1-namerica_debug.img.gz
+FINAL_IMAGE_NAME=$1_$2-namerica_debug.img.gz
+
+echo " -- Copying image $OUTPUT_IMAGE_NAME to /home/sgp1000/DebugImages/$FINAL_IMAGE_NAME"
+
+if [ -e /home/sgp1000/build/images/platform/P5/$3/games/egm/$1/images/namerica_debug/$OUTPUT_IMAGE_NAME ]; then
+    echo " -- Copying image to /home/sgp1000/DebugImages/ "
+    cp -f /home/sgp1000/build/images/platform/P5/$3/games/egm/$1/images/namerica_debug/$OUTPUT_IMAGE_NAME /home/sgp1000/DebugImages/$FINAL_IMAGE_NAME
+
+    cd /home/sgp1000/
+    sh /home/sgp1000/mountTM
+    sh /home/sgp1000/copyDebugImage $FINAL_IMAGE_NAME
+
+    echo " -- Finished Building "$1
+else
+    #make namerica_debug-cleanimage
+
+    echo " -- Build failed - "$OUTPUT_IMAGE_NAME" was not created.  Aborting copy"
+    exit 113
+fi

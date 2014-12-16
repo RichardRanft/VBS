@@ -1,0 +1,23 @@
+if [ $# -lt 1 ]; then
+        echo "Usage: BuildPlatformDebug <Platform Version>" >&2
+        exit 1
+fi
+./lua checkLoop.lua
+BUILD_PATH="/tools/bin:/mbtools/bin:/bin:/usr/bin:/sbin:/usr/sbin"
+./lua set_platform.lua $1_Debug
+sudo sh /home/sgp1000/fix_perms.sh --extract
+echo "Building debug platform..."
+cd /home/sgp1000/build/bios
+env -i PATH=$BUILD_PATH make
+cd /home/sgp1000/build/images/platform/P4
+env -i PATH=$BUILD_PATH sudo ./buildplatform.sh egm_namerica_ws_debug &> /home/sgp1000/$1_debug.log
+if [ -e P4.disk.img.gz ]; then
+  echo "Copying image to /home/sgp1000/DebugImages/"
+  cp -f P4.disk.img.gz /home/sgp1000/DebugImages/$1_debug.disk.img.gz
+  cd /home/sgp1000/
+  sh /home/sgp1000/mountTM
+  sh /home/sgp1000/copyDebugImage $1_debug.disk.img.gz
+else
+  echo "Build failed - P4.disk.img.gz was not created"
+  exit 113
+fi

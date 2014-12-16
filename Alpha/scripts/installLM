@@ -1,0 +1,12 @@
+#!/bin/sh
+# $1 - LM path
+# $2 - LM version
+# $2 - sandbox
+
+LM="${1}"
+VER="${2}"
+SANDBOX="${3}"
+
+cd /mnt/SCM.QA.Releases/ALPHA/LM/"${LM}"/"${VER}"
+
+./install.py /"${SANDBOX}"

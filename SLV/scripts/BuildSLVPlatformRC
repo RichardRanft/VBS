@@ -1,0 +1,26 @@
+if [ $# -lt 1 ]; then
+        echo "Usage: BuildSLVPlatformRC <Platform Version>" >&2
+        exit 1
+fi
+./lua checkLoop.lua
+BUILD_PATH="/tools/bin:/mbtools/bin:/bin:/usr/bin:/sbin:/usr/sbin"
+
+./lua set_platform.lua $1_Ramclear
+
+echo "Building debug ram clear platform..."
+
+cd /home/sgp1000/build/images/platform/P5/$1
+
+env -i PATH=$BUILD_PATH sudo make namerica_rc-image &> /home/sgp1000/$1_rc.log
+
+if [ -e images/namerica_rc/$1-namerica_rc.img.gz ]; then
+  echo "Copying image to /home/sgp1000/DebugImages/"
+  cp -f images/namerica_rc/$1-namerica_rc.img.gz /home/sgp1000/DebugImages/
+  cd /home/sgp1000/
+  sh /home/sgp1000/mountTM
+  sh /home/sgp1000/copyDebugImage $1-namerica_rc.img.gz
+else
+  echo "Build failed - $1-namerica_rc.img.gz was not created"
+  exit 113
+fi
+ 

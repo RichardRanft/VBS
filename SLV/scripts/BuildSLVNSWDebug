@@ -1,0 +1,34 @@
+#!/bin/sh
+if [ $# -lt 1 ]; then
+        echo "Usage: BuildSLVNSWDebug <Platform Version> <revision>" >&2
+        exit 1
+fi
+
+PLATFORM=$1
+REVISION=$2
+
+./lua checkLoop.lua
+BUILD_PATH="/tools/bin:/mbtools/bin:/bin:/usr/bin:/sbin:/usr/sbin"
+
+if [ -e build/images/platform/P5/$PLATFORM/images/nsw_debug ]; then
+    sudo rm -rf build/images/platform/P5/$PLATFORM/images/nsw_debug
+    mkdir build/images/platform/P5/$PLATFORM/images/nsw_debug
+fi
+
+echo "Building $PLATFORM debug platform..."
+
+cd /home/sgp1000/build/images/platform/P5/$PLATFORM
+
+env -i PATH=$BUILD_PATH sudo make nsw_debug-image
+
+if [ -e images/nsw_debug/$PLATFORM-nsw_debug.img.gz ]; then
+  echo "Copying image to /home/sgp1000/DebugImages/$PLATFORM_$REVISION-nsw_Debug.img.gz"
+  cp -f images/nsw_debug/$PLATFORM-nsw_debug.img.gz /home/sgp1000/DebugImages/$PLATFORM_$REVISION-nsw_Debug.img.gz
+  cd /home/sgp1000/
+  sh /home/sgp1000/mountTM
+  sh /home/sgp1000/copyDebugImage $PLATFORM_$REVISION-nsw_Debug.img.gz
+else
+  echo "Build failed - $PLATFORM-nsw_debug.img.gz was not created"
+  exit 113
+fi
+ 

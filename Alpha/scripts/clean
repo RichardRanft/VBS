@@ -1,0 +1,61 @@
+#!/bin/sh
+GAME="${1}"
+SANDBOX="${2}"
+
+OUTPUTPATH="/mnt/hgfs/buildOutput/"
+
+echo "------------------------------------------------------------------------------" &>> /gamedev/"${GAME}"_build.log
+#------------------------------------------------------------------------------
+#remove game from sandbox
+#echo " - Cleaning ${GAME} from /gamedev/${GAME} ... " &>> /gamedev/"${GAME}"_build.log
+#rm -rf /gamedev/"${GAME}" &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# copy output to shared folder
+echo " - Copying images ... " &>> /gamedev/"${GAME}"_build.log
+cp -f /gamedev/gamecore/images/Menu/*.srm.img "${OUTPUTPATH}" &>> /gamedev/"${GAME}"_build.log
+#cp -f /gamedev/gamecore/images/Menu/*.md5 "${OUTPUTPATH}" &>> /gamedev/"${GAME}"_build.log
+#cp -f /gamedev/gamecore/images/Menu/*.conf* "${OUTPUTPATH}" &>> /gamedev/"${GAME}"_build.log
+#cp -f /gamedev/gamecore/images/Menu/*.lst "${OUTPUTPATH}" &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# remove build script
+echo " - Cleaning custom scripts from /gamedev/runbuildgame ... " &>> /gamedev/"${GAME}"_build.log
+rm -f /gamedev/makeInstall &>> /gamedev/"${GAME}"_build.log
+rm -f /gamedev/makeGraphics &>> /gamedev/"${GAME}"_build.log
+rm -f /gamedev/makeAllGames &>> /gamedev/"${GAME}"_build.log
+rm -f /gamedev/makeAllSRMS &>> /gamedev/"${GAME}"_build.log
+rm -f /gamedev/publishInSandbox &>> /gamedev/"${GAME}"_build.log
+
+if [ -e /mnt/hgfs/buildScripts/buildParams.ini ]; then
+    rm -f /mnt/hgfs/buildScripts/buildParams.ini &>> /gamedev/"${GAME}"_build.log
+fi
+
+#------------------------------------------------------------------------------
+# remove source from the sandbox
+#if [ -e /gamedev/"${GAME}" ]; then
+#    #remove game from sandbox
+#    echo " - Cleaning ${GAME} from /gamedev/${GAME} ... " &>> /gamedev/"${GAME}"_build.log
+#    rm -rf /gamedev/"${GAME}" &>> /gamedev/"${GAME}"_build.log
+#fi
+
+#------------------------------------------------------------------------------
+# remove extraneous .svn folder if necessary
+if [ -e /gamedev/.svn ]; then
+    rm -rf /gamedev/.svn &>> /gamedev/"${GAME}"_build.log
+fi
+
+#------------------------------------------------------------------------------
+# copy logs to shared folder
+echo " - Copying logs ... " &>> /gamedev/"${GAME}"_build.log
+cp -f /gamedev/*.log "${OUTPUTPATH}"
+
+#------------------------------------------------------------------------------
+# remove logs from VM
+rm -f /gamedev/*.log
+
+echo " - done." &>> "${OUTPUTPATH}""${GAME}"_build.log
+
+echo "------------------------------------------------------------------------------" &>> "${OUTPUTPATH}""${GAME}"_build.log
+
+exit

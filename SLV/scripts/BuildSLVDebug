@@ -1,0 +1,51 @@
+if [ $# -lt 1 ]; then
+    echo "Usage: BuildDebug <Game Version> <(optional) platform>" >&2
+    exit 1
+fi
+
+sudo rm -rf /home/sgp1000/ProductionBuildLogs/$1_debug
+mkdir /home/sgp1000/ProductionBuildLogs/$1_debug
+
+if [ $# -gt 1 ]; then
+    ./set_platform.lua $2_Debug
+
+    echo "Building "$1" on "$2
+    cd /home/sgp1000/build/images/platform/P5/$2/games/egm/$1
+
+    if [ -e .svn ]; then
+        sudo rm -rf .svn
+    fi
+
+    if [ -e /home/sgp1000/build/game_disk.img.gz ] ; then
+      sudo rm -rf /home/sgp1000/build/game_disk.img.gz /home/sgp1000/build/deploy/games
+    fi
+    #make namerica_debug-cleanimage
+    make namerica_debug-image &> /home/sgp1000/ProductionBuildLogs/$1_debug/$1.build.txt
+else
+    echo "Building "$1
+    cd /home/sgp1000/build/images/platform/P5/$2/games/egm/$1
+
+    if [ -e .svn ]; then
+        sudo rm -rf .svn
+    fi
+
+    if [ -e /home/sgp1000/build/game_disk.img.gz ] ; then
+      sudo rm -rf /home/sgp1000/build/game_disk.img.gz /home/sgp1000/build/deploy/games
+    fi
+    #make namerica_debug-cleanimage
+    make namerica_debug-image &> /home/sgp1000/ProductionBuildLogs/$1_debug/$1.build.txt
+fi
+
+if [ -e /home/sgp1000/build/images/platform/P5/$2/games/egm/$1/images/namerica_debug/$1-namerica_debug.img.gz ]; then
+    echo "Copying image to /home/sgp1000/DebugImages/ "
+    cp -f /home/sgp1000/build/images/platform/P5/$2/games/egm/$1/images/namerica_debug/$1-namerica_debug.img.gz /home/sgp1000/DebugImages/
+
+    cd /home/sgp1000/
+    sh /home/sgp1000/mountTM
+    sh /home/sgp1000/copyDebugImage $1-namerica_debug.img.gz
+
+    echo "Finished Building "$1
+else
+    echo "Build failed - "$1.img.gz" was not created.  Aborting copy"
+    exit 113
+fi

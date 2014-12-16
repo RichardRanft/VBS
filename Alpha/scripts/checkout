@@ -1,0 +1,69 @@
+#!/bin/bash -e
+if [ $# -lt 3 ]; then
+    echo " -- usage: checkout <game core> <game> <gamepath> <(optional) refresh>"
+fi
+if [ $# -gt 4 ]; then
+    echo " -- usage: checkout <game core> <game> <gamepath> <(optional) refresh>"
+fi
+
+GAMECORE="${1}"
+GAME="${2}"
+GAMEPATH="${3}"
+REFRESH="${4}"
+
+GAME_REPO_BASE_PATH="http://10.10.130.84/svn/EGMGameSoftware/Alpha/""${GAMEPATH}"
+GAME_CORE_REPO_BASE_PATH="http://10.10.130.84/svn/EGMPlatforms/trunk/EGMPlatforms/"
+OUTPUTPATH="/home/sgp1000/buildOutput/"
+SOURCEPATH="/home/sgp1000/buildSource/"
+
+echo " - checking out game core ... "
+echo `date +"%Y-%m-%d-%H-%M-%S"`
+
+if [ ! -z "${REFRESH}" ]; then
+    #------------------------------------------------------------------------------
+    # remove potentially old gamecore source from the sandbox
+    if [ -e "${SOURCEPATH}""${GAMECORE}" ]; then
+        #remove game from sandbox
+        echo " - Cleaning ${GAMECORE} from ${SOURCEPATH}${GAMECORE} ... "
+        sudo rm -rf ${SOURCEPATH}${GAMECORE}
+    fi
+fi
+
+if [ ! -e "${SOURCEPATH}""${GAMECORE}" ]; then
+    #------------------------------------------------------------------------------
+    # check out gamecore source to /gamedev
+    # because the desired game core is missing
+    echo " - checking out ${GAMECORE} to ${SOURCEPATH}${GAMECORE} ... "
+    svn co "${GAME_CORE_REPO_BASE_PATH}""${GAMECORE}" "${SOURCEPATH}""${GAMECORE}"
+else
+    cd "${SOURCEPATH}""${GAMECORE}"
+    svn up
+fi
+
+cd ~
+
+echo " - checking out game ... "
+echo `date +"%Y-%m-%d-%H-%M-%S"`
+
+if [ ! -z "${REFRESH}" ]; then
+    #------------------------------------------------------------------------------
+    # remove potentially old source from the sandbox
+    if [ -e "${SOURCEPATH}""${GAME}" ]; then
+        #remove game from sandbox
+        echo " - Cleaning ${GAME} from ${SOURCEPATH}${GAME} ... "
+        sudo rm -rf "${SOURCEPATH}""${GAME}"
+    fi
+fi
+
+if [ ! -e "${SOURCEPATH}""${GAME}" ]; then
+    #------------------------------------------------------------------------------
+    # check out game source to /gamedev
+    # because VM shared folders are inaccessible from within the sandbox
+    echo " - checking out ${REPOSITORY} to ${SOURCEPATH}${GAME} ... "
+    svn co "${GAME_REPO_BASE_PATH}" "${SOURCEPATH}""${GAME}"
+else
+    cd "${SOURCEPATH}""${GAME}"
+    svn up
+fi
+
+echo `date +"%Y-%m-%d-%H-%M-%S"`

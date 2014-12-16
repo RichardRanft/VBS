@@ -1,0 +1,15 @@
+LOGFILE=/home/sgp1000/ProductionBuildLogs/W4NAS07C.build.txt
+SIGFILE=/home/sgp1000/ProductionBuildLogs/W4NAS07C.sig.txt
+if [ "$1" == "y" ] || [ "$1" == "Y" ]
+then
+  echo "Building release platform..."
+  cd /home/sgp1000/build/images/platform/P4
+  $(build_env) sudo ./buildplatform.sh egm_namerica_ws_deploy &> $LOGFILE
+  echo "Copying image to /home/sgp1000/ReleaseImages/"
+  cp P4.disk.img.gz /home/sgp1000/ReleaseImages/P4.disk.img.gz
+  echo -e "Platform:"'\r\n'"W4NAS07C"'\r\n'$(grep -E "^sha1 added" $LOGFILE)'\r\n'$(grep -E "^HMACsha1" $LOGFILE) > $SIGFILE 
+fi
+
+sh /home/sgp1000/BuildProduction YEENAM1A yellow_emperor "Yellow Emperor" 13E001 $2
+sh /home/sgp1000/BuildProduction LIONAM1A lioness "Lioness" 13E002 $2
+sh /home/sgp1000/BuildProduction EAENAM1A eastern_empire "Eastern Empire" 13E003 $2

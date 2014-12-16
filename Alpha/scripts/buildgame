@@ -1,0 +1,128 @@
+#!/bin/sh
+# $1 - sandbox
+# $2 - gamecore
+# $3 - game
+# $4 - repository URL
+# $5 - no refresh
+
+SANDBOX="${1}"
+GAMECORE="${2}"
+GAME="${3}"
+REPOSITORY="${4}"
+NO_REFRESH="${5}"
+
+SOURCEPATH="/mnt/hgfs/buildSource/"
+OUTPUTPATH="/mnt/hgfs/buildOutput/"
+SCRIPTPATH="/mnt/hgfs/buildScripts/"
+GAME_CORE_REPO_BASE_PATH="http://10.10.130.84/svn/EGMPlatforms/trunk/EGMPlatforms/"
+
+#------------------------------------------------------------------------------
+if [ -e "${OUTPUTPATH}""${GAME}"_build.log ]; then
+    rm -f "${OUTPUTPATH}"*.*
+fi
+
+touch /gamedev/"${GAME}"_build.log
+touch /gamedev/"${GAME}"_install.log
+touch /gamedev/"${GAME}"_graphics.log
+touch /gamedev/"${GAME}"_allgames.log
+
+#------------------------------------------------------------------------------
+echo " - building: Sandbox $SANDBOX, Gamecore $GAMECORE, Game $GAME" &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+cd /
+
+#------------------------------------------------------------------------------
+# refresh /agp link
+if [ -e /agp ]; then
+    echo " - removing agp link ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f /agp &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating agp link to /${SANDBOX}/agp ... " &>> /gamedev/"${GAME}"_build.log
+ln -s /"${SANDBOX}"/agp /agp &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# copy gamecore to /gamedev/gamecore
+echo " - copying gamecore ... " &>> /gamedev/"${GAME}"_build.log
+if [ ! -e /gamedev/"${GAMECORE}" ]; then
+    echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+    (
+        rsync -r --links --exclude=.svn "${SOURCEPATH}""${GAMECORE}" /gamedev/ &>> /gamedev/"${GAME}"_build.log
+    )
+fi
+
+#------------------------------------------------------------------------------
+# refresh /agp/gamecore link
+if [ -e /agp/gamecore ]; then
+    echo " - removing gamecore link /agp/gamecore ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f /agp/gamecore &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating gamecore link to ${GAMECORE} /agp/gamecore ... " &>> /gamedev/"${GAME}"_build.log
+ln -s /gamedev/"${GAMECORE}" /agp/gamecore &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# refresh /gamecore link
+if [ -e /gamedev/gamecore ]; then
+    echo " - removing gamecore link /gamecore ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f /gamedev/gamecore &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating gamecore link to ${GAMECORE} /gamecore ... " &>> /gamedev/"${GAME}"_build.log
+ln -sf /gamedev/"${GAMECORE}" /gamedev/gamecore &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# copy game to /gamedev/game
+echo " - copying game ... " &>> /gamedev/"${GAME}"_build.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+(
+    rsync -r --exclude=.svn "${SOURCEPATH}""${GAME}" /gamedev/ &>> /gamedev/"${GAME}"_build.log
+)
+
+#------------------------------------------------------------------------------
+# refresh /agp/games link
+if [ -e /agp/games ]; then
+    echo " - removing /agp/games link ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f /agp/games &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating games link to ${GAME} /${SANDBOX}/gamedev/games ... " &>> /gamedev/"${GAME}"_build.log
+ln -s /gamedev/"${GAME}" /agp/games &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# refresh /sandbox/gamedev/games link
+if [ -e /gamedev/games ]; then
+    echo " - removing /games link ... " &>> /gamedev/"${GAME}"_build.log
+    rm -f /gamedev/games &>> /gamedev/"${GAME}"_build.log
+fi
+
+echo " - creating games link to ${GAME} /${SANDBOX}/gamedev/games ... " &>> /gamedev/"${GAME}"_build.log
+ln -sf /gamedev/"${GAME}" /gamedev/games &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# copy custom build scripts
+echo " - copying custom build scripts ... " &>> /gamedev/"${GAME}"_build.log
+cp -f "${SCRIPTPATH}"g2s2 /"${SANDBOX}"/gamedev/"${GAMECORE}"/tools/g2s2 &>> /gamedev/"${GAME}"_build.log
+cp -f  "${SCRIPTPATH}"publishInSandbox /"${SANDBOX}"/gamedev/"${GAMECORE}"/tools/publishInSandbox &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# copy build script that will run in sandbox to the sandbox
+cp -f "${SCRIPTPATH}"runbuildgame /gamedev/ &>> /gamedev/"${GAME}"_build.log
+
+#------------------------------------------------------------------------------
+# run modified g2s script
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+sh /"${SANDBOX}"/gamedev/"${GAMECORE}"/tools/g2s2 "${SANDBOX}" "${GAMECORE}" "${GAME}" &>> /gamedev/"${GAME}"_build.log
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# remove build script
+echo " - Cleaning runbuildgame from /gamedev/runbuildgame ... " &>> /gamedev/"${GAME}"_build.log
+rm -f /gamedev/runbuildgame &>> /gamedev/"${GAME}"_build.log &>> /gamedev/"${GAME}"_build.log
+
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> /gamedev/"${GAME}"_build.log
+
+sh "${SCRIPTPATH}"clean "${GAME}" "${SANDBOX}"
+
+exit

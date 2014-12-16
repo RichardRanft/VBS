@@ -1,0 +1,27 @@
+if [ $# -lt 1 ]; then
+        echo "Usage: BuildPlatform <Platform Version>" >&2
+        exit 1
+fi
+./lua checkLoop.lua
+BUILD_PATH="/tools/bin:/mbtools/bin:/bin:/usr/bin:/sbin:/usr/sbin"
+./lua set_platform.lua $1_Release
+LOGFILE=/home/sgp1000/ProductionBuildLogs/$1.build.txt
+SIGFILE=/home/sgp1000/ProductionBuildLogs/$1.sig.txt
+echo "Building release platform..."
+cd /home/sgp1000/build/images/platform/P5/$1
+
+env -i PATH=$BUILD_PATH sudo make nsw_deploy-image &> $LOGFILE
+
+#cd /home/sgp1000/build/images/platform/P5/$1
+
+if [ -e images/nsw_deploy/$1-nsw_deploy.img.gz ]; then
+  echo "Copying image to /home/sgp1000/ReleaseImages/"
+  cp -f images/nsw_deploy/$1-nsw_deploy.img.gz /home/sgp1000/ReleaseImages/$1-nsw_deploy.img.gz
+  echo -e "Platform:"'\r\n'"$1"'\r\n'$(grep -E "^sha1 added" $LOGFILE)'\r\n'$(grep -E "^HMACsha1" $LOGFILE) > $SIGFILE 
+  cd /home/sgp1000/
+  sh /home/sgp1000/mountTM
+  sh /home/sgp1000/copyReleaseImage $1-nsw_deploy.img.gz
+else
+  echo "Build failed - $1-nsw_deploy.img.gz was not created"
+  exit 113
+fi

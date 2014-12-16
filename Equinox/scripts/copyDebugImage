@@ -1,0 +1,1 @@
+sudo cp -f /home/sgp1000/DebugImages/$1 /mnt/TableMaster/EGM_AMERICA/DebugImages/

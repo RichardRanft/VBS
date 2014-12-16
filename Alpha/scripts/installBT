@@ -1,0 +1,12 @@
+#!/bin/sh
+# $1 - BT path
+# $2 - BT version
+# $2 - sandbox
+
+BT="${1}"
+VER="${2}"
+SANDBOX="${3}"
+
+cd /mnt/SCM.QA.Releases/ALPHA/BT/"${BT}"/"${VER}"
+
+./install.py /"${SANDBOX}"

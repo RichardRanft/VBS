@@ -1,0 +1,41 @@
+#!/bin/bash -e
+if [ $# -lt 2 ]; then
+    echo " -- usage: checkoutGame <game> <gamepath> <(optional) refresh>"
+fi
+if [ $# -gt 3 ]; then
+    echo " -- usage: checkoutGame <game> <gamepath> <(optional) refresh>"
+fi
+
+GAME="${1}"
+GAMEPATH="${2}"
+REFRESH="${3}"
+
+GAME_REPO_PATH="http://10.10.130.84/svn/EGMGameSoftware/Alpha/""${GAMEPATH}""/""${GAME}"
+OUTPUTPATH="/home/sgp1000/buildOutput/"
+SOURCEPATH="/home/sgp1000/buildSource/"
+
+echo " - checking out game ... " &>> "${OUTPUTPATH}""${GAME}"_checkout.log
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> "${OUTPUTPATH}""${GAME}"_checkout.log
+
+if [ ! -z "${REFRESH}" ]; then
+    #------------------------------------------------------------------------------
+    # remove potentially old source from the sandbox
+    if [ -e "${SOURCEPATH}""${GAME}" ]; then
+        #remove game from sandbox
+        echo " - Cleaning ${GAME} from ${SOURCEPATH}${GAME} ... " &>> "${OUTPUTPATH}""${GAME}"_checkout.log
+        sudo rm -rf "${SOURCEPATH}""${GAME}"
+    fi
+fi
+
+if [ ! -e "${SOURCEPATH}""${GAME}" ]; then
+    #------------------------------------------------------------------------------
+    # check out game source to /gamedev
+    # because VM shared folders are inaccessible from within the sandbox
+    echo " - checking out ${GAMEPATH}/${GAME} to ${SOURCEPATH}${GAME} ... "
+    svn co "${GAME_REPO_PATH}" "${SOURCEPATH}""${GAME}" &>> "${OUTPUTPATH}""${GAME}"_checkout.log
+else
+    cd "${SOURCEPATH}""${GAME}"
+    svn up &>> "${OUTPUTPATH}""${GAME}"_checkout.log
+fi
+
+echo `date +"%Y-%m-%d-%H-%M-%S"` &>> "${OUTPUTPATH}""${GAME}"_checkout.log

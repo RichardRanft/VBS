@@ -1,0 +1,10 @@
+if [ $# -lt 1 ]; then
+        echo "Usage: burnPlatformDebug <Platform Version>" >&2
+        exit 1
+fi
+if [ -e /mnt/TableMaster/EGM_AMERICA/DebugImages/$1-namerica_debug.img.gz ]; then
+    sh mountTM
+    sudo sh /home/sgp1000/SLVFlashCardBurner.sh /mnt/TableMaster/EGM_AMERICA/DebugImages/$1-namerica_debug.img.gz
+  else
+    sudo sh /home/sgp1000/SLVFlashCardBurner.sh /home/sgp1000/DebugImages/$1-namerica_debug.img.gz
+fi

@@ -1,0 +1,10 @@
+if [ $# -lt 3 ]; then
+        echo "Usage: checkoutPlatformEmulation <Platform Version> <Label> <Platform Folder>" >&2
+        exit 1
+fi
+echo "Removing old files..."
+if [ -e "/home/sgp1000/workspace/north_america/$3" ]; then
+  sudo rm -rf /home/sgp1000/workspace/north_america/$3
+fi
+echo "Checking out $1 at label $2 to project folder /home/sgp1000/workspace/north_america/$3"
+stcmd co -p "gamedev:GameDev1@starteam.australia.shufflemaster.com:49209/sgp_1000/$1" -fp "/home/sgp1000/workspace/north_america/$3" -eol "on" -is -o -cfgl "$2"

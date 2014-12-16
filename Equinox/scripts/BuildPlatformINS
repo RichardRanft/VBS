@@ -1,0 +1,28 @@
+if [ $# -lt 1 ]; then
+        echo "Usage: BuildPlatform <Platform Version>" >&2
+        exit 1
+fi
+./lua checkLoop.lua
+BUILD_PATH="/tools/bin:/mbtools/bin:/bin:/usr/bin:/sbin:/usr/sbin"
+LOGFILE=/home/sgp1000/ProductionBuildLogs/$1.build.txt
+SIGFILE=/home/sgp1000/ProductionBuildLogs/$1.sig.txt
+./lua set_platform.lua $1_Release
+echo "Building release platform..."
+sudo sh fix_perms.sh --extract
+cd /home/sgp1000/build/bios
+env -i PATH=$BUILD_PATH make
+
+cd /home/sgp1000/build/images/platform/P4
+sudo make clean
+env -i PATH=$BUILD_PATH sudo ./buildplatform.sh egm_macau_ws_deploy &> $LOGFILE
+if [ -e P4.disk.img.gz ]; then
+  echo "Copying image to /home/sgp1000/ReleaseImages/"
+  cp -f P4.disk.img.gz /home/sgp1000/ReleaseImages/$1.disk.img.gz
+  echo -e "Platform:"'\r\n'"$1"'\r\n'$(grep -E "^sha1 added" $LOGFILE)'\r\n'$(grep -E "^HMACsha1" $LOGFILE) > $SIGFILE 
+  cd /home/sgp1000/
+  sh /home/sgp1000/mountTM
+  sh /home/sgp1000/copyReleaseImage $1.img.gz 
+else
+  echo "Build failed - P4.disk.img.gz was not created"
+  exit 113
+fi

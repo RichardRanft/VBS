@@ -1,0 +1,45 @@
+#!/bin/bash
+# $1 - platform
+PLATFORM=$1
+
+#------------------------------------------------------------------------------
+# set link for shared scripts folder
+if [ -e /home/sgp1000/sharedScripts ]; then
+    echo " - removing link for shared scripts folder ... "
+    rm -f /home/sgp1000/sharedScripts
+    echo $?
+fi
+
+echo " - creating link to /home/sgp1000/VBS/SLV/scripts ... "
+ln -sf /home/sgp1000/VBS/SLV/scripts /home/sgp1000/sharedScripts
+echo $?
+
+#------------------------------------------------------------------------------
+# set link for build folder
+if [ -e /home/sgp1000/buildSource/build ]; then
+    echo " - removing link for shared scripts folder ... "
+    rm -f /home/sgp1000/buildSource/build
+    echo $?
+fi
+
+echo " - creating link to /home/sgp1000/VBS/SLV/scripts ... "
+ln -sf /home/sgp1000/"${PLATFORM}" /home/sgp1000/buildSource/build
+echo $?
+
+#------------------------------------------------------------------------------
+# set link for build output folder
+if [ -e /home/sgp1000/buildOutput ]; then
+    echo " - removing link for build output folder ... "
+    rm -rf /home/sgp1000/buildOutput
+    echo $?
+fi
+
+if [ ! -e /home/sgp1000/VBS/SLV/buildOutput ]; then
+    mkdir /home/sgp1000/VBS/SLV/buildOutput
+    echo $?
+fi
+
+echo " - creating link to /home/sgp1000/VBS/SLV/buildOutput ... "
+ln -sf /home/sgp1000/VBS/SLV/buildOutput /home/sgp1000/buildOutput
+echo $?
+

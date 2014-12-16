@@ -1,0 +1,87 @@
+#!/bin/sh
+
+# $1 The game version 
+# --- WOMNAM1A
+# $2 source folder
+# --- wolf_mountain
+# $3 "game name"
+# --- "Wolf Mountain"
+# $4 part number
+# --- 14E002
+# $5 platform
+# --- W4NAS07L
+# $6 should be the market name
+# --- currently only NorthAmerica, NewYork or LatinAmerica are supported
+
+if [ $# -lt 6 ]; then
+  echo "Usage: BuildProduction <game version> <source folder> <"game name"> <part number> <platform> <market>"
+  echo " -- available markets:"
+  echo " NorthAmerica"
+  echo " LatinAmerica"
+  echo " NewYork"
+  exit 2
+fi
+./set_platform.lua $5_Release
+PLATFORMSIGFILE=/home/sgp1000/ProductionBuildLogs/$5.sig.txt
+GAMEPLATFORMSIG="/home/sgp1000/Release/EGM/PC4/$6/$3 $1 $4/$5.txt"
+GAMELOGFILE=/home/sgp1000/ProductionBuildLogs/$1/$1.build.txt
+GAMESIGFILE="/home/sgp1000/Release/EGM/PC4/$6/$3 $1 $4/$1.txt"
+
+if [ $6 == "NorthAmerica" ]; then
+    MARKET="north_america"
+    elif [ $6 == "NewYork" ]; then
+        MARKET="new_york"
+    elif [ $6 == "LatinAmerica" ];then
+        MARKET="latin_america"
+    else
+        echo "Invalid market specified"
+        echo " -- available markets:"
+        echo " NorthAmerica"
+        echo " LatinAmerica"
+        echo " NewYork"
+        exit 12
+fi
+
+echo "Building "$3" on platform "$5" for "$6
+cd /home/sgp1000/build/images/games/$1
+
+echo "Cleaning..."
+cp /home/sgp1000/SourcePackages/Makefile /home/sgp1000/build/images/games/$1/Makefile
+sudo cp -f /home/sgp1000/SourcePackages/make_game_disk.sh /home/sgp1000/build/utils/bin/make_game_disk.sh
+sudo cp -f /home/sgp1000/SourcePackages/add_disk_image_sha1 /home/sgp1000/build/utils/bin/add_disk_image_sha1
+
+sudo make clean &> /dev/null
+
+echo "Logging to directory /home/sgp1000/ProductionBuildLogs/"$1
+mkdir /home/sgp1000/ProductionBuildLogs &> /dev/null
+mkdir /home/sgp1000/ProductionBuildLogs/$1 &> /dev/null
+
+echo "Starting Make..."
+cd /home/sgp1000/build/images/games/$1
+if [ -e .svn ]; then
+    sudo rm -rf .svn
+fi
+
+sudo make all &> /home/sgp1000/ProductionBuildLogs/$1/$1.build.txt
+if [ -e /home/sgp1000/build/images/games/$1/$1.img.gz ]; then
+  echo "Copying image to /home/sgp1000/ReleaseImages/ "
+  cp -f /home/sgp1000/build/images/games/$1/$1.img.gz /home/sgp1000/ReleaseImages/$1.img.gz
+else
+  echo "Build failed"
+  exit 113
+fi
+
+sleep 60
+
+echo "Generating document package for "$MARKET
+cd /home/sgp1000/
+./createPacket.lua $1 $2 "$3" $4 $MARKET $5 &> /home/sgp1000/ProductionBuildLogs/$1/$1.gen.txt
+
+sleep 20
+
+echo "Updating game signature document..."
+cp -f $PLATFORMSIGFILE "$GAMEPLATFORMSIG"
+
+echo -e "Game:"'\r\n'$1 $3'\r\n'$(grep -E "^sha1 generated:" $GAMELOGFILE)'\r\n'$(grep -E "^HMACsha1" $GAMELOGFILE) > "$GAMESIGFILE"
+
+echo "Finished building "$3

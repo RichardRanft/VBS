@@ -1,0 +1,10 @@
+if [ $# -lt 1 ]; then
+        echo "Usage: burnSLVRC <Platform Version>" >&2
+        exit 1
+fi
+if [ -e /mnt/TableMaster/EGM_AMERICA/ReleaseImages/$1-usa_ram_clear_deploy.img.gz ]; then
+    sh mountTM
+    sudo sh /home/sgp1000/SLVFlashCardBurner.sh /mnt/TableMaster/EGM_AMERICA/ReleaseImages/$1-usa_ram_clear_deploy.img.gz
+  else
+    sudo sh /home/sgp1000/SLVFlashCardBurner.sh /home/sgp1000/ReleaseImages/$1-usa_ram_clear_deploy.img.gz
+fi

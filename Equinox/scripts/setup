@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#------------------------------------------------------------------------------
+# set link for shared scripts folder
+if [ -e /home/sgp1000/sharedScripts ]; then
+    echo " - removing link for shared scripts folder ... "
+    rm -f /home/sgp1000/sharedScripts
+    #echo $?
+fi
+
+echo " - creating agp link to /home/sgp1000/VBS/Equinox/scripts ... "
+ln -sf /home/sgp1000/VBS/Equinox/scripts /home/sgp1000/sharedScripts
+#echo $?
+
+#------------------------------------------------------------------------------
+# set link for build output folder
+if [ -e /home/sgp1000/buildOutput ]; then
+    echo " - removing link for build output folder ... "
+    sudo rm -rf /home/sgp1000/buildOutput
+    #echo $?
+fi
+
+if [ ! -e /home/sgp1000/VBS/Equinox/buildOutput ]; then
+    mkdir /home/sgp1000/VBS/Equinox/buildOutput
+    #echo $?
+fi
+
+echo " - creating link to /home/sgp1000/VBS/Equinox/buildOutput ... "
+ln -s /home/sgp1000/VBS/Equinox/buildOutput /home/sgp1000/buildOutput
+echo $?
+
+rm -f /home/sgp1000/buildOutput/*.*

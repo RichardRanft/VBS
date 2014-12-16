@@ -1,0 +1,7 @@
+./lua set_platform.lua W4INS03A_Debug
+sh checkoutPlatformINS platform_development W4INS03A-004
+
+./lua set_platform.lua W4INS03A_Release
+cp -rf /home/sgp1000/W4INS03A_Debug/* /home/sgp1000/build
+
+./lua set_platform.lua W4NAS07F_Debug 
