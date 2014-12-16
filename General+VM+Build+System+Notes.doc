@@ -1,0 +1,295 @@
+Message-ID: <25537803.1.1418766310202.JavaMail.root@ReelTeam6-BuildServer>
+Subject: Exported From Confluence
+MIME-Version: 1.0
+Content-Type: multipart/related; 
+	boundary="----=_Part_0_27076605.1418766310183"
+
+------=_Part_0_27076605.1418766310183
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-Location: file:///C:/exported.html
+
+<html xmlns:o=3D'urn:schemas-microsoft-com:office:office'
+      xmlns:w=3D'urn:schemas-microsoft-com:office:word'
+      xmlns:v=3D'urn:schemas-microsoft-com:vml'
+      xmlns=3D'urn:w3-org-ns:HTML'>
+<head>
+    <meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8=
+">
+    <title>General VM Build System Notes</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:TargetScreenSize>1024x640</o:TargetScreenSize>
+            <o:PixelsPerInch>72</o:PixelsPerInch>
+            <o:AllowPNG/>
+        </o:OfficeDocumentSettings>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>90</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+                <!--
+        @page Section1 {
+            size: 8.5in 11.0in;
+            margin: 1.0in;
+            mso-header-margin: .5in;
+            mso-footer-margin: .5in;
+            mso-paper-source: 0;
+        }
+
+        td {
+            page-break-inside: avoid;
+        }
+
+        tr {
+            page-break-after: avoid;
+        }
+
+        div.Section1 {
+            page: Section1;
+        }
+
+        /* Confluence print stylesheet. Common to all themes for print medi=
+a */
+/* Full of !important until we improve batching for print CSS */
+
+#main {
+    padding-bottom: 1em !important; /* The default padding of 6em is too mu=
+ch for printouts */
+}
+
+body {
+    font-family: Arial, Helvetica, FreeSans, sans-serif;
+    font-size: 10pt;
+    line-height: 1.2;
+}
+
+body, #full-height-container, #main, #page, #content, .has-personal-sidebar=
+ #content {
+    background: #fff    !important;
+    color: #000         !important;
+    border: 0           !important;
+    width: 100%         !important;
+    height: auto        !important;
+    min-height: auto    !important;
+    margin: 0           !important;
+    padding: 0          !important;
+    display: block      !important;
+}
+
+a, a:link, a:visited, a:focus, a:hover, a:active {
+    color: #000;
+}
+#content h1,
+#content h2,
+#content h3,
+#content h4,
+#content h5,
+#content h6 {
+    font-family: Arial, Helvetica, FreeSans, sans-serif;
+    page-break-after: avoid;
+}
+pre {
+    font-family: Monaco, "Courier New", monospace;
+}
+
+#header,
+.aui-header-inner,
+#navigation,
+#sidebar,
+.sidebar,
+#personal-info-sidebar,
+.ia-fixed-sidebar,
+.page-actions,
+.navmenu,
+.ajs-menu-bar,
+.noprint,
+.inline-control-link,
+.inline-control-link a,
+a.show-labels-editor,
+.global-comment-actions,
+.comment-actions,
+.quick-comment-container,
+#addcomment {
+    display: none !important;
+}
+
+.comment .date::before {
+    content: none !important; /* remove middot for print view */
+}
+
+h1.pagetitle img {
+    height: auto;
+    width: auto;
+}
+
+.print-only {
+    display: block;
+}
+#footer {
+    position: relative !important; /* CONF-17506 Place the footer at end of=
+ the content */
+    margin: 0;
+    padding: 0;
+    background: none;
+    clear: both;
+}
+
+#poweredby {
+    border-top: none;
+    background: none;
+}
+
+#poweredby li.print-only {
+    display: list-item;
+    font-style: italic;
+}
+
+#poweredby li.noprint {
+    display:none;
+}
+
+
+/* no width controls in print */
+.wiki-content .table-wrap,
+.wiki-content p,
+.panel .codeContent,
+.panel .codeContent pre,
+.image-wrap {
+    overflow: visible !important;
+}
+
+/* TODO - should this work? */
+#children-section,
+#comments-section .comment,
+#comments-section .comment .comment-body,
+#comments-section .comment .comment-content,
+#comments-section .comment p {
+    page-break-inside: avoid;
+}
+
+#page-children a {
+    text-decoration: none;
+}
+
+/**
+ hide twixies
+
+ the specificity here is a hack because print styles
+ are getting loaded before the base styles. */
+#comments-section.pageSection .section-header,
+#comments-section.pageSection .section-title,
+#children-section.pageSection .section-header,
+#children-section.pageSection .section-title,
+.children-show-hide {
+    padding-left: 0;
+    margin-left: 0;
+}
+
+.children-show-hide.icon {
+    display: none;
+}
+
+/* personal sidebar */
+.has-personal-sidebar #content {
+    margin-right: 0px;
+}
+
+.has-personal-sidebar #content .pageSection {
+    margin-right: 0px;
+}
+-->
+    </style>
+</head>
+<body>
+    <h1>General VM Build System Notes</h1>
+    <div class=3D"Section1">
+        <p>The current scripts can be found in&nbsp;<a href=3D"http://10.10=
+.130.84/viewvc/EGMTools/trunk/EGM/VBS/" class=3D"external-link" rel=3D"nofo=
+llow">the EGMTools repository</a>. &nbsp;The VBS folder should be checked o=
+ut to /home/sgp1000/ on the agent system.</p>
+<p>I tried to keep the scripts easy to read so that anyone could maintain t=
+hem.</p>
+<p>Initially I created a <em>buildSource</em> and <em>buildOutput</em> fold=
+er in <em>/home/sgp1000</em> to use as shared folders between the host and =
+guest environments. &nbsp;I've now added a sharedScripts link that is updat=
+ed by the build system scripts based on the build target.</p>
+<p>The shared folders are:</p>
+<div class=3D"table-wrap">
+<table class=3D"confluenceTable">
+<tbody>
+<tr>
+<th class=3D"confluenceTh">Host OS</th>
+<th class=3D"confluenceTh">Guest OS</th>
+</tr>
+<tr>
+<td class=3D"confluenceTd">/home/sgp1000/sharedScripts/</td>
+<td class=3D"confluenceTd">/mnt/hgfs/buildScripts/</td>
+</tr>
+<tr>
+<td class=3D"confluenceTd">/home/sgp1000/buildSource/</td>
+<td class=3D"confluenceTd">/mnt/hgfs/buildSource/</td>
+</tr>
+<tr>
+<td class=3D"confluenceTd">/home/sgp1000/buildOutput/</td>
+<td class=3D"confluenceTd">/mnt/hgfs/buildOutput/</td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><em>buildSource</em> - folder in /home/sgp1000/ for source code checkout=
+.</p>
+<p><em>buildOutput</em> - link to /home/sgp1000/VBS/&lt;target&gt;/buildOut=
+put, updated by the target's Lua script</p>
+<p><em>sharedScripts</em> - link to /home/sgp1000/VBS/&lt;target&gt;/script=
+s. &nbsp;These are support scripts that are run on the guest operating syst=
+em via the Lua build script.</p>
+</blockquote>
+<p>Executing vmrun's <strong>runScriptInGuest</strong> executes the script =
+in a fresh environment.&nbsp; This means that each script is run as if it w=
+ere in a new console window - no state from the previous command is kept (u=
+nless you actually created or altered something in the filesystem). &nbsp;T=
+he&nbsp;<em>sharedScripts</em> folder allows scripts in the guest to execut=
+e other scripts directly while maintaining the current environment, among o=
+ther things.</p>
+<p>Currently I am testing in the <a href=3D"http://reelteam6-buildserver.ad=
+.agi:8111/project.html?projectId=3DAlphaEgm_Utility_VmScriptTests" style=3D=
+"line-height: 1.4285715;" class=3D"external-link" rel=3D"nofollow">VM Scrip=
+t Tests</a><span style=3D"line-height: 1.4285715;"> TeamCity project.</span=
+></p>
+<p>Additionally, I'm attempting to get the SLV Agent set up for virtualized=
+ builds as well.&nbsp; I have copied the VM to the machine but it needs to =
+have VMWare Workstation installed.&nbsp; I'm not certain if an agent can be=
+long to more than one agent pool - and once I can get all of our build envi=
+ronments virtualized it won't really matter.&nbsp; For the moment, however,=
+ it is an issue that should be explored.</p>
+<p>After some issues with <strong>vmrun</strong> timing out on long operati=
+ons I have decided to redesign the Alpha build to look for a build paramete=
+r file on boot and build using the supplied information if it finds said fi=
+le.&nbsp; This looks promising because once the VM is up and running it sho=
+uld simply go until it completes, then the cleanup script will call <strong=
+>shutdown</strong>.&nbsp; The TeamCity agent can check periodically for the=
+ build logs to appear in buildOutput to keep it waiting for completion so i=
+t can then collect artifacts - but it will also keep it busy so that anothe=
+r build is not started until the current build finishes .</p>
+<p>Key to the <strong>build-on-boot</strong>&nbsp;idea is that the build sc=
+ripts have to execute <em>before</em> the login prompt is reached. &nbsp;Th=
+is required adding some scripts in <strong>etc/init.d/</strong> to check fo=
+r a build parameters file before reaching the login prompt. &nbsp;If the fi=
+le is not present the system just starts as usual, otherwise the system run=
+s a script to build the game using the parameters from the file and then sh=
+uts down. &nbsp;<a href=3D"http://www.novell.com/documentation/suse91/susel=
+inux-adminguide/html/ch13s04.html" class=3D"external-link" rel=3D"nofollow"=
+>This page</a> was my reference for getting this working and <a href=3D"htt=
+p://www.tldp.org/HOWTO/HighQuality-Apps-HOWTO/boot.html" class=3D"external-=
+link" rel=3D"nofollow">this page</a> contains additional relevant informati=
+on.</p>
+    </div>
+</body>
+</html>
+------=_Part_0_27076605.1418766310183--
